@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الأوامر | Xtra Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('partials/nav') %>
+<main style="padding-top:65px;">
+<div class="section">
+  <h1 class="section-title" style="margin-top:2rem;">📋 قائمة الأوامر</h1>
+  <p class="section-subtitle">أكثر من 99 أمر slash — بدون برفكس نهائياً</p>
+
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem;">
+    <button class="btn btn-accent cat-btn active-cat" data-cat="all">🔍 الكل</button>
+    <button class="btn btn-secondary cat-btn" data-cat="general">📋 عامة</button>
+    <button class="btn btn-secondary cat-btn" data-cat="admin">🛡️ إدارية</button>
+    <button class="btn btn-secondary cat-btn" data-cat="tickets">🎫 تذاكر</button>
+    <button class="btn btn-secondary cat-btn" data-cat="games">🎮 ألعاب</button>
+    <button class="btn btn-secondary cat-btn" data-cat="protection">🔒 حماية</button>
+    <button class="btn btn-secondary cat-btn" data-cat="levels">📊 مستويات</button>
+    <button class="btn btn-secondary cat-btn" data-cat="embed">💬 إيمبيد</button>
+    <button class="btn btn-secondary cat-btn" data-cat="autorespond">🤖 ردود</button>
+    <button class="btn btn-gold cat-btn" data-cat="premium">💎 بريميوم</button>
+  </div>
+
+  <div class="features-grid" id="commands-grid">
+    <% const cmds = [
+      {cat:'general',icon:'📋',name:'ping',desc:'سرعة البوت'},
+      {cat:'general',icon:'📋',name:'help',desc:'قائمة الأوامر التفاعلية'},
+      {cat:'general',icon:'📋',name:'serverinfo',desc:'معلومات السيرفر'},
+      {cat:'general',icon:'📋',name:'userinfo',desc:'معلومات مستخدم'},
+      {cat:'general',icon:'📋',name:'avatar',desc:'الصورة الشخصية'},
+      {cat:'general',icon:'📋',name:'botinfo',desc:'معلومات البوت'},
+      {cat:'general',icon:'📋',name:'poll',desc:'إنشاء استفتاء'},
+      {cat:'general',icon:'📋',name:'say',desc:'إرسال رسالة كالبوت'},
+      {cat:'general',icon:'📋',name:'roleinfo',desc:'معلومات دور'},
+      {cat:'general',icon:'📋',name:'invite',desc:'رابط دعوة البوت'},
+      {cat:'general',icon:'📋',name:'suggest',desc:'إرسال اقتراح'},
+      {cat:'general',icon:'📋',name:'weather',desc:'معلومات الطقس'},
+      {cat:'general',icon:'📋',name:'remindme',desc:'تذكير مؤقت'},
+      {cat:'general',icon:'📋',name:'translate',desc:'ترجمة نص'},
+      {cat:'general',icon:'📋',name:'shortcut',desc:'اختصار للأوامر'},
+      {cat:'general',icon:'📋',name:'setlang',desc:'تغيير لغة البوت'},
+      {cat:'admin',icon:'🛡️',name:'ban',desc:'حظر عضو'},
+      {cat:'admin',icon:'🛡️',name:'kick',desc:'طرد عضو'},
+      {cat:'admin',icon:'🛡️',name:'mute',desc:'كتم عضو مؤقتاً'},
+      {cat:'admin',icon:'🛡️',name:'unmute',desc:'إلغاء كتم'},
+      {cat:'admin',icon:'🛡️',name:'warn',desc:'تحذير عضو'},
+      {cat:'admin',icon:'🛡️',name:'warnings',desc:'عرض التحذيرات'},
+      {cat:'admin',icon:'🛡️',name:'clearwarnings',desc:'مسح التحذيرات'},
+      {cat:'admin',icon:'🛡️',name:'purge',desc:'مسح رسائل'},
+      {cat:'admin',icon:'🛡️',name:'slowmode',desc:'وضع البطء'},
+      {cat:'admin',icon:'🛡️',name:'lock',desc:'قفل قناة'},
+      {cat:'admin',icon:'🛡️',name:'unlock',desc:'فتح قناة'},
+      {cat:'admin',icon:'🛡️',name:'addrole',desc:'إضافة دور'},
+      {cat:'admin',icon:'🛡️',name:'removerole',desc:'إزالة دور'},
+      {cat:'admin',icon:'🛡️',name:'nickname',desc:'تغيير اسم عضو'},
+      {cat:'admin',icon:'🛡️',name:'unban',desc:'رفع الحظر'},
+      {cat:'admin',icon:'🛡️',name:'setlog',desc:'قناة اللوقات'},
+      {cat:'admin',icon:'🛡️',name:'setwelcome',desc:'إعداد الترحيب'},
+      {cat:'admin',icon:'🛡️',name:'logs',desc:'عرض اللوقات'},
+      {cat:'tickets',icon:'🎫',name:'ticket setup',desc:'إعداد التذاكر'},
+      {cat:'tickets',icon:'🎫',name:'ticket panel',desc:'إرسال لوحة التذاكر'},
+      {cat:'tickets',icon:'🎫',name:'ticket close',desc:'إغلاق التذكرة'},
+      {cat:'tickets',icon:'🎫',name:'ticket claim',desc:'استلام التذكرة'},
+      {cat:'tickets',icon:'🎫',name:'ticket add',desc:'إضافة عضو للتذكرة'},
+      {cat:'tickets',icon:'🎫',name:'ticket remove',desc:'إزالة عضو من التذكرة'},
+      {cat:'games',icon:'🎮',name:'coinflip',desc:'رمي العملة'},
+      {cat:'games',icon:'🎮',name:'rps',desc:'حجرة ورقة مقص'},
+      {cat:'games',icon:'🎮',name:'dice',desc:'رمي النرد'},
+      {cat:'games',icon:'🎮',name:'trivia',desc:'سؤال معلومات عامة'},
+      {cat:'games',icon:'🎮',name:'number',desc:'تخمين الأرقام'},
+      {cat:'games',icon:'🎮',name:'gameimage set',desc:'تعيين صورة لعبة'},
+      {cat:'games',icon:'🎮',name:'gameimage show',desc:'عرض صورة لعبة'},
+      {cat:'protection',icon:'🔒',name:'protection status',desc:'حالة الحماية'},
+      {cat:'protection',icon:'🔒',name:'protection antispam',desc:'مضاد السبام'},
+      {cat:'protection',icon:'🔒',name:'protection antilinks',desc:'مضاد الروابط'},
+      {cat:'protection',icon:'🔒',name:'protection anticaps',desc:'مضاد الكابس'},
+      {cat:'protection',icon:'🔒',name:'protection antimention',desc:'مضاد المنشن'},
+      {cat:'levels',icon:'📊',name:'rank',desc:'بطاقة رتبتك'},
+      {cat:'levels',icon:'📊',name:'leaderboard',desc:'لوحة المتصدرين'},
+      {cat:'levels',icon:'📊',name:'setxp',desc:'تعيين XP لمستخدم'},
+      {cat:'embed',icon:'💬',name:'embed create',desc:'إنشاء إيمبيد'},
+      {cat:'embed',icon:'💬',name:'embed send',desc:'إرسال إيمبيد'},
+      {cat:'embed',icon:'💬',name:'embed list',desc:'قائمة الإيمبيدات'},
+      {cat:'embed',icon:'💬',name:'embed delete',desc:'حذف إيمبيد'},
+      {cat:'autorespond',icon:'🤖',name:'autorespond add',desc:'إضافة رد تلقائي'},
+      {cat:'autorespond',icon:'🤖',name:'autorespond remove',desc:'حذف رد تلقائي'},
+      {cat:'autorespond',icon:'🤖',name:'autorespond list',desc:'قائمة الردود'},
+      {cat:'autorespond',icon:'🤖',name:'autorespond toggle',desc:'تفعيل/تعطيل رد'},
+      {cat:'premium',icon:'💎',name:'tokencheck',desc:'فحص توكن ديسكورد'},
+      {cat:'premium',icon:'💎',name:'premiuminfo',desc:'معلومات البريميوم'},
+    ]; %>
+    <% cmds.forEach(c => { %>
+    <div class="feature-card cmd-card" data-cat="<%= c.cat %>" style="display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;">
+      <span style="font-size:1.4rem;"><%= c.icon %></span>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:.9rem;">/<%= c.name %></div>
+        <div style="color:var(--text2);font-size:.8rem;"><%= c.desc %></div>
+      </div>
+      <% if (c.cat === 'premium') { %>
+        <span class="server-badge badge-bot" style="font-size:.7rem;">💎</span>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+
+  <div style="text-align:center;margin-top:3rem;color:var(--text2);">
+    إجمالي الأوامر: <strong style="color:var(--accent);font-size:1.2rem;"><%= 62 %></strong> أمر + قيد التطوير المستمر 🔥
+  </div>
+</div>
+</main>
+<%- include('partials/footer') %>
+<script>
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => {
+      b.classList.remove('btn-accent','active-cat');
+      b.classList.add('btn-secondary');
+    });
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-accent','active-cat');
+    const cat = btn.dataset.cat;
+    document.querySelectorAll('.cmd-card').forEach(c => {
+      c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'flex' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

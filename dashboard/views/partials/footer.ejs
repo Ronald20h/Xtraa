@@ -1,0 +1,25 @@
+<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:2rem;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:center;">
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <div class="brand-logo">X</div>
+      <div><strong>Xtra Bot</strong><br><span style="color:var(--text2);font-size:.85rem;">أفضل بوت ديسكورد عربي</span></div>
+    </div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <a href="https://discord.com/oauth2/authorize?client_id=1481917947407765616" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;" title="أضف البوت"><i class="fas fa-plus"></i> أضف البوت</a>
+      <a href="https://discord.gg/7UtgNs6xfK" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;"><i class="fab fa-discord"></i> ديسكورد</a>
+      <a href="https://wa.me/201069181060" target="_blank" style="color:#25d366;text-decoration:none;font-size:.9rem;"><i class="fab fa-whatsapp"></i> واتساب</a>
+    </div>
+    <p style="color:var(--text2);font-size:.85rem;">Developed with ❤️ by <strong>STEVEN</strong></p>
+  </div>
+</footer>
+<script>
+function toggleLang() {
+  const isAr = document.documentElement.lang === 'ar';
+  document.documentElement.lang = isAr ? 'en' : 'ar';
+  document.documentElement.dir = isAr ? 'ltr' : 'rtl';
+  localStorage.setItem('lang', document.documentElement.lang);
+}
+const sl = localStorage.getItem('lang');
+if (sl) { document.documentElement.lang = sl; document.documentElement.dir = sl==='ar'?'rtl':'ltr'; }
+</script>
+<script src="/js/main.js"></script>

@@ -1,0 +1,23 @@
+<nav class="navbar">
+  <a href="/" class="nav-brand" style="text-decoration:none;display:flex;align-items:center;gap:.6rem;">
+    <div class="brand-logo">X</div>
+    <span class="brand-name">Xtra</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+    <a href="/commands" class="nav-link"><i class="fas fa-terminal"></i> الأوامر</a>
+    <a href="/premium" class="nav-link premium-link"><i class="fas fa-crown"></i> بريميوم</a>
+    <button class="lang-btn" onclick="toggleLang()">🌐 EN/AR</button>
+    <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <div class="user-menu">
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" class="user-avatar" alt="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+        <span><%= user.username %></span>
+        <a href="/auth/logout" class="logout-btn" title="خروج"><i class="fas fa-sign-out-alt"></i></a>
+      </div>
+    <% } else { %>
+      <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> تسجيل الدخول</a>
+    <% } %>
+  </div>
+  <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')"><i class="fas fa-bars"></i></button>
+</nav>

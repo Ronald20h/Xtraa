@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' | Xtra Bot' : 'Xtra Bot' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="nav-brand">
+      <div class="brand-logo">X</div>
+      <span class="brand-name">Xtra</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+      <a href="/commands" class="nav-link"><i class="fas fa-terminal"></i> الأوامر</a>
+      <a href="/premium" class="nav-link premium-link"><i class="fas fa-crown"></i> بريميوم</a>
+      <button class="lang-btn" onclick="toggleLang()">🌐 EN/AR</button>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <div class="user-menu">
+          <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" class="user-avatar" alt="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+          <span><%= user.username %></span>
+          <a href="/auth/logout" class="logout-btn" title="خروج"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+      <% } else { %>
+        <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> تسجيل الدخول</a>
+      <% } %>
+    </div>
+    <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')"><i class="fas fa-bars"></i></button>
+  </nav>
+  <main><%- body %></main>
+  <footer class="footer">
+    <div class="footer-content" style="max-width:1200px;margin:0 auto;padding:2rem;display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:center;">
+      <div class="footer-brand" style="display:flex;align-items:center;gap:.8rem;">
+        <div class="brand-logo">X</div>
+        <div><strong style="font-size:1.1rem;">Xtra Bot</strong><br><span style="color:var(--text2);font-size:.85rem;">أفضل بوت ديسكورد عربي</span></div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <a href="https://discord.com/oauth2/authorize?client_id=1481917947407765616" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;"><i class="fas fa-plus"></i> أضف البوت</a>
+        <a href="https://discord.gg/7UtgNs6xfK" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;"><i class="fab fa-discord"></i> ديسكورد</a>
+        <a href="https://wa.me/201069181060" target="_blank" style="color:#25d366;text-decoration:none;font-size:.9rem;"><i class="fab fa-whatsapp"></i> واتساب</a>
+      </div>
+      <p style="color:var(--text2);font-size:.85rem;">Developed with ❤️ by <strong>STEVEN</strong></p>
+    </div>
+  </footer>
+  <script>
+    function toggleLang() {
+      const isAr = document.documentElement.lang === 'ar';
+      document.documentElement.lang = isAr ? 'en' : 'ar';
+      document.documentElement.dir = isAr ? 'ltr' : 'rtl';
+      localStorage.setItem('lang', document.documentElement.lang);
+    }
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang) { document.documentElement.lang = savedLang; document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr'; }
+  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الأونر | Xtra Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-brand"><div class="brand-logo">X</div><span class="brand-name">Xtra Owner</span></div>
+  <div class="nav-links">
+    <a href="/" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+    <a href="/auth/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> خروج</a>
+  </div>
+</nav>
+<div style="padding:80px 2rem 2rem;">
+  <% if (locals.query) { %>
+    <% if (query.granted) { %><div class="alert alert-success">✅ تم منح Premium بنجاح</div><% } %>
+    <% if (query.revoked) { %><div class="alert alert-danger">❌ تم سحب Premium</div><% } %>
+    <% if (query.broadcast) { %><div class="alert alert-success">📢 تم الإرسال لـ <%= query.broadcast %> سيرفر</div><% } %>
+  <% } %>
+
+  <h1 style="font-size:1.8rem;font-weight:900;margin-bottom:1.5rem;">🔐 لوحة الأونر</h1>
+
+  <div class="owner-grid">
+    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">🌐 السيرفرات</div><div class="num"><%= totalGuilds %></div></div>
+    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">👥 المستخدمون</div><div class="num"><%= totalUsers %></div></div>
+    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">💎 Premium</div><div class="num"><%= premiums.length %></div></div>
+    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">💓 Ping</div><div class="num"><%= ping %>ms</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <!-- Grant Premium -->
+    <div class="card">
+      <div class="card-title">💎 منح Premium</div>
+      <form method="POST" action="/owner/premium/grant">
+        <div class="form-group"><label>ID السيرفر</label><input class="form-control" name="guild_id" placeholder="1234567890" required></div>
+        <div class="form-group"><label>الخطة</label><select class="form-control" name="plan"><option value="basic">Basic</option><option value="pro">Pro</option><option value="lifetime">Lifetime</option></select></div>
+        <div class="form-group"><label>تاريخ الانتهاء (اختياري)</label><input class="form-control" type="date" name="expires_at"></div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;">💎 منح Premium</button>
+      </form>
+    </div>
+
+    <!-- Broadcast -->
+    <div class="card">
+      <div class="card-title">📢 إرسال إعلان</div>
+      <form method="POST" action="/owner/broadcast">
+        <div class="form-group"><label>الرسالة</label><textarea class="form-control" name="message" rows="4" placeholder="اكتب إعلانك هنا..." required style="resize:vertical;"></textarea></div>
+        <button type="submit" class="btn btn-accent" style="width:100%;justify-content:center;"><i class="fas fa-broadcast-tower"></i> إرسال لجميع السيرفرات</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Premium Servers -->
+  <div class="card">
+    <div class="card-title">⭐ السيرفرات المميزة (<%= premiums.length %>)</div>
+    <% if (premiums.length === 0) { %>
+      <p style="color:var(--text2);text-align:center;padding:1rem;">لا توجد سيرفرات مميزة</p>
+    <% } else { %>
+    <div class="table-wrap"><table>
+      <tr><th>ID السيرفر</th><th>الخطة</th><th>ينتهي</th><th>الإجراء</th></tr>
+      <% premiums.forEach(p => { %>
+      <tr>
+        <td style="font-family:monospace;"><%= p.guild_id %></td>
+        <td><span class="server-badge badge-bot"><%= p.plan %></span></td>
+        <td style="font-size:.85rem;color:var(--text2);"><%= p.expires_at || 'دائم' %></td>
+        <td><form method="POST" action="/owner/premium/revoke" style="display:inline;">
+          <input type="hidden" name="guild_id" value="<%= p.guild_id %>">
+          <button type="submit" class="btn btn-danger" style="padding:.3rem .7rem;font-size:.8rem;">سحب</button>
+        </form></td>
+      </tr>
+      <% }) %>
+    </table></div>
+    <% } %>
+  </div>
+
+  <!-- All Guilds -->
+  <div class="card">
+    <div class="card-title">🌐 جميع السيرفرات (<%= guilds.length %>)</div>
+    <div class="table-wrap"><table>
+      <tr><th>ID</th><th>اللغة</th><th>Premium</th><th>تاريخ الإضافة</th></tr>
+      <% guilds.slice(0,20).forEach(g => { %>
+      <tr>
+        <td style="font-family:monospace;font-size:.85rem;"><%= g.id %></td>
+        <td><%= g.lang === 'ar' ? '🇸🇦 عربي' : '🇺🇸 English' %></td>
+        <td><span class="server-badge <%= g.premium?'badge-bot':''" style="<%= g.premium?'':'color:var(--text2)' %>"><%= g.premium ? '💎 نعم' : '—' %></span></td>
+        <td style="font-size:.8rem;color:var(--text2);"><%= g.created_at %></td>
+      </tr>
+      <% }) %>
+    </table></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سيرفراتك | Xtra Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/nav') %>
+<main style="padding-top:65px;">
+<div class="section" style="padding-top:3rem;">
+  <div class="page-header">
+    <h1>🖥️ سيرفراتك</h1>
+    <p style="color:var(--text2);margin-top:.3rem;">اختر سيرفراً لإدارته — تظهر فقط السيرفرات التي تملك فيها صلاحية الأدمن</p>
+  </div>
+
+  <% if (!guilds || guilds.length === 0) { %>
+    <div class="card" style="text-align:center;padding:4rem;">
+      <div style="font-size:3.5rem;margin-bottom:1rem;">😕</div>
+      <h3 style="font-size:1.3rem;margin-bottom:.5rem;">لا توجد سيرفرات</h3>
+      <p style="color:var(--text2);">أنت لست مدير (Admin) في أي سيرفر حالياً</p>
+    </div>
+  <% } else { %>
+  <div class="server-grid">
+    <% guilds.forEach(g => { %>
+    <a href="<%= g.botInGuild ? '/dashboard/guild/' + g.id : 'https://discord.com/oauth2/authorize?client_id=' + process.env.CLIENT_ID + '&permissions=8&scope=bot%20applications.commands&guild_id=' + g.id %>"
+       class="server-card" <%= !g.botInGuild ? 'target="_blank"' : '' %>>
+      <% if (g.iconURL) { %>
+        <img src="<%= g.iconURL %>" alt="<%= g.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="no-icon" style="display:none;"><%= g.name.charAt(0).toUpperCase() %></div>
+      <% } else { %>
+        <div class="no-icon"><%= g.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <h3><%= g.name %></h3>
+      <span class="server-badge <%= g.botInGuild ? 'badge-bot' : 'badge-nobot' %>">
+        <%= g.botInGuild ? '✅ إدارة السيرفر' : '➕ أضف البوت' %>
+      </span>
+    </a>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+</main>
+<%- include('../partials/footer') %>
+</body>
+</html>
