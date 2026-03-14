@@ -8,89 +8,152 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav class="navbar">
-  <div class="nav-brand"><div class="brand-logo">X</div><span class="brand-name">Xtra Owner</span></div>
-  <div class="nav-links">
-    <a href="/" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
-    <a href="/auth/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> خروج</a>
+<%- include('../partials/nav') %>
+<div style="padding-top:var(--nav-h);">
+<div class="dashboard-layout">
+<div class="sidebar">
+  <div class="sidebar-guild">
+    <div class="guild-avatar">👑</div>
+    <div><div class="guild-name">لوحة الأونر</div><div class="guild-meta">STEVEN</div></div>
   </div>
-</nav>
-<div style="padding:80px 2rem 2rem;">
-  <% if (locals.query) { %>
-    <% if (query.granted) { %><div class="alert alert-success">✅ تم منح Premium بنجاح</div><% } %>
-    <% if (query.revoked) { %><div class="alert alert-danger">❌ تم سحب Premium</div><% } %>
-    <% if (query.broadcast) { %><div class="alert alert-success">📢 تم الإرسال لـ <%= query.broadcast %> سيرفر</div><% } %>
+  <div class="sidebar-section">التحكم</div>
+  <a href="#stats" class="sidebar-link active" onclick="setActive(this)"><i class="fas fa-chart-bar"></i> <span>الإحصائيات</span></a>
+  <a href="#premium" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-crown"></i> <span>إدارة البريميوم</span></a>
+  <a href="#guilds" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-server"></i> <span>السيرفرات</span></a>
+  <a href="#broadcast" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-broadcast-tower"></i> <span>الإذاعة</span></a>
+</div>
+<div class="content">
+  <% if (typeof query !== 'undefined') { %>
+    <% if (query.granted) { %><div class="alert alert-success"><i class="fas fa-crown"></i> تم منح البريميوم بنجاح!</div><% } %>
+    <% if (query.revoked) { %><div class="alert alert-error"><i class="fas fa-times"></i> تم سحب البريميوم</div><% } %>
+    <% if (query.broadcast) { %><div class="alert alert-info"><i class="fas fa-broadcast-tower"></i> تم الإرسال لـ <%= query.broadcast %> سيرفر</div><% } %>
   <% } %>
 
-  <h1 style="font-size:1.8rem;font-weight:900;margin-bottom:1.5rem;">🔐 لوحة الأونر</h1>
-
-  <div class="owner-grid">
-    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">🌐 السيرفرات</div><div class="num"><%= totalGuilds %></div></div>
-    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">👥 المستخدمون</div><div class="num"><%= totalUsers %></div></div>
-    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">💎 Premium</div><div class="num"><%= premiums.length %></div></div>
-    <div class="owner-stat"><div style="color:var(--text2);font-size:.85rem;">💓 Ping</div><div class="num"><%= ping %>ms</div></div>
+  <!-- Stats -->
+  <div id="stats">
+    <div class="page-header"><h1><i class="fas fa-chart-bar text-accent"></i> إحصائيات البوت</h1></div>
+    <div class="owner-stats">
+      <div class="owner-stat">
+        <div class="owner-stat-icon">🌐</div>
+        <div><div class="owner-stat-value"><%= totalGuilds %></div><div class="owner-stat-label">سيرفر</div></div>
+      </div>
+      <div class="owner-stat">
+        <div class="owner-stat-icon">👥</div>
+        <div><div class="owner-stat-value"><%= totalUsers %></div><div class="owner-stat-label">مستخدم</div></div>
+      </div>
+      <div class="owner-stat">
+        <div class="owner-stat-icon">💎</div>
+        <div><div class="owner-stat-value"><%= premiums ? premiums.length : 0 %></div><div class="owner-stat-label">سيرفر بريميوم</div></div>
+      </div>
+      <div class="owner-stat">
+        <div class="owner-stat-icon">💓</div>
+        <div><div class="owner-stat-value"><%= ping %>ms</div><div class="owner-stat-label">Ping</div></div>
+      </div>
+    </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-    <!-- Grant Premium -->
+  <hr class="divider">
+
+  <!-- Premium Management -->
+  <div id="premium">
+    <div class="page-header"><h1><i class="fas fa-crown text-gold"></i> إدارة البريميوم</h1></div>
     <div class="card">
-      <div class="card-title">💎 منح Premium</div>
+      <div class="card-title"><i class="fas fa-plus text-accent"></i> منح البريميوم</div>
       <form method="POST" action="/owner/premium/grant">
-        <div class="form-group"><label>ID السيرفر</label><input class="form-control" name="guild_id" placeholder="1234567890" required></div>
-        <div class="form-group"><label>الخطة</label><select class="form-control" name="plan"><option value="basic">Basic</option><option value="pro">Pro</option><option value="lifetime">Lifetime</option></select></div>
-        <div class="form-group"><label>تاريخ الانتهاء (اختياري)</label><input class="form-control" type="date" name="expires_at"></div>
-        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;">💎 منح Premium</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label>🆔 Server ID</label>
+            <input class="form-control" name="guild_id" placeholder="1234567890..." required>
+          </div>
+          <div class="form-group">
+            <label>📦 الباقة</label>
+            <select class="form-control" name="plan">
+              <option value="basic">⭐ Basic</option>
+              <option value="pro">💎 Pro</option>
+              <option value="unlimited">🚀 Unlimited</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>📅 تاريخ الانتهاء (اتركه فارغاً للأبد)</label>
+          <input class="form-control" type="date" name="expires_at">
+        </div>
+        <button class="btn btn-gold" type="submit"><i class="fas fa-crown"></i> منح البريميوم</button>
       </form>
     </div>
 
-    <!-- Broadcast -->
+    <% if (premiums && premiums.length) { %>
     <div class="card">
-      <div class="card-title">📢 إرسال إعلان</div>
-      <form method="POST" action="/owner/broadcast">
-        <div class="form-group"><label>الرسالة</label><textarea class="form-control" name="message" rows="4" placeholder="اكتب إعلانك هنا..." required style="resize:vertical;"></textarea></div>
-        <button type="submit" class="btn btn-accent" style="width:100%;justify-content:center;"><i class="fas fa-broadcast-tower"></i> إرسال لجميع السيرفرات</button>
-      </form>
+      <div class="card-title"><i class="fas fa-list text-gold"></i> السيرفرات المميزة (<%= premiums.length %>)</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>السيرفر</th><th>الباقة</th><th>الانتهاء</th><th>بواسطة</th><th>إجراء</th></tr>
+          <% premiums.forEach(p => { %>
+          <tr>
+            <td><code><%= p.guild_id %></code></td>
+            <td><span class="badge <%= p.plan === 'unlimited' ? 'badge-purple' : p.plan === 'pro' ? 'badge-gold' : 'badge-blue' %>"><%= p.plan %></span></td>
+            <td style="color:var(--text2);font-size:.82rem;"><%= p.expires_at ? p.expires_at.split('T')[0] : '♾️ أبدي' %></td>
+            <td style="color:var(--text2);font-size:.82rem;"><code><%= p.granted_by %></code></td>
+            <td>
+              <form method="POST" action="/owner/premium/revoke" style="display:inline;">
+                <input type="hidden" name="guild_id" value="<%= p.guild_id %>">
+                <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> سحب</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <!-- Premium Servers -->
-  <div class="card">
-    <div class="card-title">⭐ السيرفرات المميزة (<%= premiums.length %>)</div>
-    <% if (premiums.length === 0) { %>
-      <p style="color:var(--text2);text-align:center;padding:1rem;">لا توجد سيرفرات مميزة</p>
-    <% } else { %>
-    <div class="table-wrap"><table>
-      <tr><th>ID السيرفر</th><th>الخطة</th><th>ينتهي</th><th>الإجراء</th></tr>
-      <% premiums.forEach(p => { %>
-      <tr>
-        <td style="font-family:monospace;"><%= p.guild_id %></td>
-        <td><span class="server-badge badge-bot"><%= p.plan %></span></td>
-        <td style="font-size:.85rem;color:var(--text2);"><%= p.expires_at || 'دائم' %></td>
-        <td><form method="POST" action="/owner/premium/revoke" style="display:inline;">
-          <input type="hidden" name="guild_id" value="<%= p.guild_id %>">
-          <button type="submit" class="btn btn-danger" style="padding:.3rem .7rem;font-size:.8rem;">سحب</button>
-        </form></td>
-      </tr>
-      <% }) %>
-    </table></div>
     <% } %>
   </div>
 
-  <!-- All Guilds -->
-  <div class="card">
-    <div class="card-title">🌐 جميع السيرفرات (<%= guilds.length %>)</div>
-    <div class="table-wrap"><table>
-      <tr><th>ID</th><th>اللغة</th><th>Premium</th><th>تاريخ الإضافة</th></tr>
-      <% guilds.slice(0,20).forEach(g => { %>
-      <tr>
-        <td style="font-family:monospace;font-size:.85rem;"><%= g.id %></td>
-        <td><%= g.lang === 'ar' ? '🇸🇦 عربي' : '🇺🇸 English' %></td>
-        <td><span class="server-badge <%= g.premium?'badge-bot':''" style="<%= g.premium?'':'color:var(--text2)' %>"><%= g.premium ? '💎 نعم' : '—' %></span></td>
-        <td style="font-size:.8rem;color:var(--text2);"><%= g.created_at %></td>
-      </tr>
-      <% }) %>
-    </table></div>
+  <hr class="divider">
+
+  <!-- Guilds -->
+  <div id="guilds">
+    <div class="page-header"><h1><i class="fas fa-server text-accent"></i> جميع السيرفرات (<%= totalGuilds %>)</h1></div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <tr><th>ID</th><th>اللغة</th><th>البريميوم</th><th>التاريخ</th></tr>
+          <% guilds.slice(0, 30).forEach(g => { %>
+          <tr>
+            <td><code><%= g.id %></code></td>
+            <td><span class="badge badge-blue"><%= g.lang || 'ar' %></span></td>
+            <td><span class="badge <%= g.premium ? 'badge-gold' : 'badge-red' %>"><%= g.premium ? '✅ نعم' : '❌ لا' %></span></td>
+            <td style="color:var(--text2);font-size:.8rem;"><%= g.created_at ? g.created_at.split('T')[0] : '—' %></td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Broadcast -->
+  <div id="broadcast">
+    <div class="page-header"><h1><i class="fas fa-broadcast-tower text-accent"></i> إذاعة عامة</h1></div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-paper-plane text-accent"></i> إرسال إعلان لجميع السيرفرات</div>
+      <form method="POST" action="/owner/broadcast">
+        <div class="form-group">
+          <label>📢 نص الإعلان</label>
+          <textarea class="form-control" name="message" rows="4" placeholder="اكتب إعلانك هنا..." required></textarea>
+        </div>
+        <button class="btn btn-accent" type="submit" onclick="return confirm('هل أنت متأكد من إرسال هذا الإعلان لجميع السيرفرات؟')">
+          <i class="fas fa-paper-plane"></i> إرسال للكل
+        </button>
+      </form>
+    </div>
   </div>
 </div>
+</div>
+</div>
+<%- include('../partials/footer') %>
+<script>
+function setActive(el){document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));el.classList.add('active');}
+</script>
 </body>
 </html>

@@ -1,25 +1,22 @@
-<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:2rem;">
-  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:center;">
-    <div style="display:flex;align-items:center;gap:.8rem;">
-      <div class="brand-logo">X</div>
-      <div><strong>Xtra Bot</strong><br><span style="color:var(--text2);font-size:.85rem;">أفضل بوت ديسكورد عربي</span></div>
+<footer class="footer">
+  <div class="footer-content">
+    <div class="flex" style="align-items:center;gap:.8rem;">
+      <div class="brand-logo" style="width:34px;height:34px;font-size:1rem;">X</div>
+      <div>
+        <strong style="font-size:1rem;">Xtra Bot</strong><br>
+        <span style="color:var(--text2);font-size:.8rem;">أفضل بوت ديسكورد عربي</span>
+      </div>
     </div>
-    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
-      <a href="https://discord.com/oauth2/authorize?client_id=1481917947407765616" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;" title="أضف البوت"><i class="fas fa-plus"></i> أضف البوت</a>
-      <a href="https://discord.gg/7UtgNs6xfK" target="_blank" style="color:var(--text2);text-decoration:none;font-size:.9rem;"><i class="fab fa-discord"></i> ديسكورد</a>
-      <a href="https://wa.me/201069181060" target="_blank" style="color:#25d366;text-decoration:none;font-size:.9rem;"><i class="fab fa-whatsapp"></i> واتساب</a>
+    <div class="footer-links">
+      <a href="https://discord.com/oauth2/authorize?client_id=<%= typeof process !== 'undefined' ? process.env.CLIENT_ID || '1481917947407765616' : '1481917947407765616' %>" target="_blank"><i class="fas fa-plus"></i> أضف البوت</a>
+      <a href="https://discord.gg/7UtgNs6xfK" target="_blank"><i class="fab fa-discord"></i> ديسكورد</a>
+      <a href="https://wa.me/201069181060" target="_blank" style="color:#25d366;"><i class="fab fa-whatsapp"></i> واتساب</a>
+      <a href="/commands"><i class="fas fa-terminal"></i> الأوامر</a>
     </div>
-    <p style="color:var(--text2);font-size:.85rem;">Developed with ❤️ by <strong>STEVEN</strong></p>
+    <p class="footer-copy">Developed with ❤️ by <strong>STEVEN</strong> • Xtra Bot v2.0</p>
   </div>
 </footer>
 <script>
-function toggleLang() {
-  const isAr = document.documentElement.lang === 'ar';
-  document.documentElement.lang = isAr ? 'en' : 'ar';
-  document.documentElement.dir = isAr ? 'ltr' : 'rtl';
-  localStorage.setItem('lang', document.documentElement.lang);
-}
-const sl = localStorage.getItem('lang');
-if (sl) { document.documentElement.lang = sl; document.documentElement.dir = sl==='ar'?'rtl':'ltr'; }
+function toggleLang(){const h=document.documentElement;const ar=h.lang==='ar';h.lang=ar?'en':'ar';h.dir=ar?'ltr':'rtl';localStorage.setItem('lang',h.lang);const btn=document.querySelector('.lang-btn');if(btn)btn.textContent=ar?'🌐 AR':'🌐 EN';}
+const sl=localStorage.getItem('lang');if(sl&&sl!=='ar'){document.documentElement.lang=sl;document.documentElement.dir='ltr';const btn=document.querySelector('.lang-btn');if(btn)btn.textContent='🌐 AR';}
 </script>
-<script src="/js/main.js"></script>

@@ -2,73 +2,58 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium | Xtra Bot</title>
+  <title>البريميوم | Xtra Bot</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <%- include('partials/nav') %>
-<main style="padding-top:65px;">
-<div class="section" style="text-align:center;padding-top:4rem;">
-  <div style="font-size:4rem;margin-bottom:1rem;animation:fadeIn .6s ease;">👑</div>
-  <h1 class="section-title">Xtra Premium</h1>
-  <p class="section-subtitle">احصل على ميزات حصرية وادعم تطوير البوت</p>
-
-  <div class="premium-grid" style="max-width:900px;margin:0 auto 4rem;">
+<main style="padding-top:calc(var(--nav-h) + 2rem);">
+<div class="section">
+  <h1 class="section-title">💎 باقات بريميوم Xtra Bot</h1>
+  <p class="section-subtitle">ميزات حصرية لتجربة أفضل</p>
+  <div class="premium-grid">
     <div class="premium-card">
-      <h3 style="font-size:1.3rem;margin-bottom:.5rem;">🆓 Free</h3>
-      <p style="color:var(--text2);font-size:.85rem;margin-bottom:1rem;">للجميع</p>
-      <div class="premium-price" style="color:var(--green);">مجاناً</div>
-      <ul class="premium-features">
-        <li>جميع الأوامر الأساسية</li>
-        <li>نظام التذاكر (5 تذاكر)</li>
-        <li>نظام المستويات</li>
-        <li>الحماية الأساسية</li>
-        <li>الردود التلقائية</li>
-        <li>الداشبورد الكامل</li>
+      <div style="font-size:2.5rem;margin-bottom:1rem;">⭐</div>
+      <h2 style="font-size:1.3rem;margin-bottom:.5rem;">Basic</h2>
+      <div class="price">مجاناً</div>
+      <p style="color:var(--text2);font-size:.9rem;margin:.8rem 0;">للسيرفرات العادية</p>
+      <ul>
+        <li>حتى 5 تذاكر</li>
+        <li>الأوامر الأساسية</li>
+        <li>حماية أساسية</li>
+        <li>مستويات XP</li>
       </ul>
-      <a href="https://discord.com/oauth2/authorize?client_id=1481917947407765616" target="_blank" class="btn btn-accent" style="width:100%;justify-content:center;padding:.8rem;">
-        <i class="fab fa-discord"></i> أضف البوت
-      </a>
     </div>
-
-    <div class="premium-card popular">
-      <div class="popular-badge">⭐ الأكثر طلباً</div>
-      <h3 style="font-size:1.3rem;margin-bottom:.5rem;">💎 Premium</h3>
-      <p style="color:var(--text2);font-size:.85rem;margin-bottom:1rem;">للسيرفرات المميزة</p>
-      <div class="premium-price">تواصل معنا</div>
-      <ul class="premium-features">
-        <li>كل ميزات Free</li>
-        <li>🔐 فحص التوكنات</li>
-        <li>تذاكر غير محدودة</li>
-        <li>أولوية الدعم الفني</li>
+    <div class="premium-card featured">
+      <div style="position:absolute;top:-12px;right:50%;transform:translateX(50%);background:var(--gold);color:#000;padding:.25rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;">✨ الأشهر</div>
+      <div style="font-size:2.5rem;margin-bottom:1rem;">💎</div>
+      <h2 style="font-size:1.3rem;margin-bottom:.5rem;color:var(--gold);">Pro</h2>
+      <div class="price" style="color:var(--gold);">تواصل معنا</div>
+      <p style="color:var(--text2);font-size:.9rem;margin:.8rem 0;">للسيرفرات المتقدمة</p>
+      <ul>
+        <li>تذاكر غير محدودة ♾️</li>
+        <li>جميع أوامر البريميوم</li>
+        <li>حماية قصوى</li>
         <li>إحصائيات متقدمة</li>
-        <li>ميزات حصرية قادمة</li>
+        <li>أولوية في الدعم</li>
       </ul>
-      <div style="display:flex;flex-direction:column;gap:.7rem;">
-        <a href="https://wa.me/201069181060" target="_blank" class="btn btn-success" style="width:100%;justify-content:center;padding:.8rem;">
-          <i class="fab fa-whatsapp"></i> تواصل على واتساب
-        </a>
-        <a href="https://discord.gg/7UtgNs6xfK" target="_blank" class="btn btn-accent" style="width:100%;justify-content:center;">
-          <i class="fab fa-discord"></i> سيرفر الدعم
-        </a>
-      </div>
+      <a href="https://wa.me/201069181060" target="_blank" class="btn btn-gold w-full" style="margin-top:1rem;justify-content:center;"><i class="fab fa-whatsapp"></i> تواصل معنا</a>
     </div>
-  </div>
-
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:600px;margin:0 auto 4rem;">
-    <h3 style="margin-bottom:1rem;font-size:1.3rem;">📞 تواصل مع الدعم</h3>
-    <p style="color:var(--text2);margin-bottom:1.5rem;line-height:1.8;">
-      للحصول على Premium أو للاستفسار عن الميزات، تواصل معنا مباشرة
-    </p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="https://wa.me/201069181060" target="_blank" class="btn btn-success" style="padding:.7rem 1.5rem;">
-        <i class="fab fa-whatsapp"></i> +201069181060
-      </a>
-      <a href="https://discord.gg/7UtgNs6xfK" target="_blank" class="btn btn-accent" style="padding:.7rem 1.5rem;">
-        <i class="fab fa-discord"></i> discord.gg/7UtgNs6xfK
-      </a>
+    <div class="premium-card">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🚀</div>
+      <h2 style="font-size:1.3rem;margin-bottom:.5rem;">Unlimited</h2>
+      <div class="price">VIP</div>
+      <p style="color:var(--text2);font-size:.9rem;margin:.8rem 0;">للسيرفرات الكبيرة</p>
+      <ul>
+        <li>كل ميزات Pro</li>
+        <li>خادم خاص مخصص</li>
+        <li>دعم فوري 24/7</li>
+        <li>تخصيص كامل</li>
+        <li>ميزات حصرية</li>
+      </ul>
+      <a href="https://discord.gg/7UtgNs6xfK" target="_blank" class="btn btn-accent w-full" style="margin-top:1rem;justify-content:center;"><i class="fab fa-discord"></i> تواصل على ديسكورد</a>
     </div>
   </div>
 </div>

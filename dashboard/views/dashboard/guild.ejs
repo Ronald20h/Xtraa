@@ -8,212 +8,608 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('../layout', { title: guild.name, body: '' }) %>
-  <div style="padding-top:65px;">
-  <% if (typeof query !== 'undefined' && query.saved) { %>
-    <div class="alert alert-success" style="margin:1rem 2rem;"><i class="fas fa-check"></i> تم الحفظ بنجاح!</div>
+<%- include('../partials/nav') %>
+<div style="padding-top:var(--nav-h);">
+<% if (typeof query !== 'undefined' && query.saved) { %>
+  <div class="alert alert-success" style="margin:1rem 1.5rem;"><i class="fas fa-check-circle"></i> تم الحفظ بنجاح!</div>
+<% } %>
+
+<div class="dashboard-layout">
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sidebar-guild">
+    <% if (guild.icon) { %>
+      <img src="<%= guild.icon %>" alt="" style="border-radius:12px;">
+    <% } else { %>
+      <div class="guild-avatar"><%= guild.name.charAt(0) %></div>
+    <% } %>
+    <div>
+      <div class="guild-name"><%= guild.name %></div>
+      <div class="guild-meta">👥 <%= guild.memberCount %> عضو</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">الإعدادات</div>
+  <a href="#general" class="sidebar-link active" onclick="setActive(this)"><i class="fas fa-cog"></i> <span>عام</span></a>
+  <a href="#welcome" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-door-open"></i> <span>الترحيب</span></a>
+  <a href="#protection" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-shield-alt"></i> <span>الحماية</span></a>
+  <a href="#tickets" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-ticket-alt"></i> <span>التذاكر</span></a>
+  <a href="#levels" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-chart-line"></i> <span>المستويات</span></a>
+  <a href="#autoroles" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-user-tag"></i> <span>الرتب التلقائية</span> <span class="badge-new">جديد</span></a>
+  <a href="#shortcuts" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-bolt"></i> <span>الاختصارات</span> <span class="badge-new">جديد</span></a>
+  <a href="#autorespond" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-robot"></i> <span>الردود التلقائية</span></a>
+  <a href="#logs" class="sidebar-link" onclick="setActive(this)"><i class="fas fa-list-alt"></i> <span>اللوقات</span></a>
+
+  <% if (premium) { %>
+  <div class="sidebar-section">بريميوم 💎</div>
+  <div style="background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.2);border-radius:8px;padding:.6rem .8rem;font-size:.78rem;color:var(--gold);text-align:center;">
+    ✨ سيرفر مميز!
+  </div>
   <% } %>
-  <div class="dashboard-layout">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-guild">
-        <% if (guild.icon) { %><img src="<%= guild.icon %>" alt=""><% } else { %><div class="no-icon" style="width:42px;height:42px;min-width:42px;font-size:1rem;"><%= guild.name.charAt(0) %></div><% } %>
-        <div>
-          <div class="guild-name"><%= guild.name %></div>
-          <div class="guild-count">👥 <%= guild.memberCount %> عضو</div>
+
+  <div style="margin-top:1.5rem;">
+    <a href="/dashboard" class="sidebar-link"><i class="fas fa-arrow-right"></i> <span>العودة</span></a>
+  </div>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+
+  <!-- ══ GENERAL ══ -->
+  <div id="general">
+    <div class="page-header">
+      <h1><i class="fas fa-cog text-accent"></i> الإعدادات العامة</h1>
+      <p>إعدادات البوت الأساسية لهذا السيرفر</p>
+    </div>
+    <form method="POST" action="/dashboard/guild/<%= guild.id %>/save">
+    <div class="card">
+      <div class="card-title"><i class="fas fa-sliders-h text-accent"></i> الإعدادات الأساسية</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>🌐 لغة البوت</label>
+          <select class="form-control" name="lang">
+            <option value="ar" <%= guildData.lang === 'ar' ? 'selected' : '' %>>🇸🇦 العربية</option>
+            <option value="en" <%= guildData.lang === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📋 قناة اللوقات العامة</label>
+          <select class="form-control" name="log_channel">
+            <option value="">— معطل —</option>
+            <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.log_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
+          </select>
         </div>
       </div>
-      <div class="sidebar-section">الإعدادات</div>
-      <a href="#general" class="sidebar-link active"><i class="fas fa-cog"></i> عام</a>
-      <a href="#welcome" class="sidebar-link"><i class="fas fa-door-open"></i> الترحيب</a>
-      <a href="#protection" class="sidebar-link"><i class="fas fa-shield-alt"></i> الحماية</a>
-      <a href="#tickets" class="sidebar-link"><i class="fas fa-ticket-alt"></i> التذاكر</a>
-      <a href="#levels" class="sidebar-link"><i class="fas fa-chart-line"></i> المستويات</a>
-      <a href="#autorespond" class="sidebar-link"><i class="fas fa-robot"></i> الردود التلقائية</a>
-      <a href="#commands" class="sidebar-link"><i class="fas fa-terminal"></i> الأوامر</a>
-      <a href="#logs" class="sidebar-link"><i class="fas fa-list"></i> اللوقات</a>
-      <% if (premium) { %>
-      <div class="sidebar-section">بريميوم ⭐</div>
-      <div style="background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:8px;padding:.6rem;font-size:.8rem;color:var(--gold);text-align:center;">💎 هذا السيرفر مميز!</div>
-      <% } %>
-      <div style="margin-top:auto;padding-top:2rem;">
-        <a href="/dashboard" class="sidebar-link"><i class="fas fa-arrow-right"></i> العودة</a>
+      <button type="submit" class="btn btn-accent"><i class="fas fa-save"></i> حفظ</button>
+    </div>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ WELCOME ══ -->
+  <div id="welcome">
+    <div class="page-header">
+      <h1><i class="fas fa-door-open text-accent"></i> نظام الترحيب</h1>
+      <p>تخصيص رسائل الترحيب بالأعضاء الجدد</p>
+    </div>
+    <form method="POST" action="/dashboard/guild/<%= guild.id %>/welcome/save">
+    <div class="card">
+      <div class="card-title"><i class="fas fa-cog text-accent"></i> إعدادات الترحيب</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📢 قناة الترحيب</label>
+          <select class="form-control" name="welcome_channel">
+            <option value="">— معطل —</option>
+            <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.welcome_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📩 نوع رسالة الترحيب</label>
+          <select class="form-control" name="welcome_type">
+            <option value="embed" <%= (guildData.welcome_type||'embed') === 'embed' ? 'selected' : '' %>>📋 Embed فخم</option>
+            <option value="text" <%= guildData.welcome_type === 'text' ? 'selected' : '' %>>💬 نص عادي</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>💬 رسالة الترحيب</label>
+        <small style="color:var(--text2);display:block;margin-bottom:.4rem;">المتغيرات: <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{user}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{username}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{server}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{count}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{mention}</code></small>
+        <textarea class="form-control" name="welcome_message" rows="3" placeholder="🎉 أهلاً {user} في {server}! أنت العضو رقم {count}"><%= guildData.welcome_message || '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>🖼️ صورة خلفية الترحيب (رابط)</label>
+        <input class="form-control" name="welcome_bg" type="url" placeholder="https://..." value="<%= guildData.welcome_bg || '' %>">
+      </div>
+      <hr class="divider">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>📩 رسالة خاصة عند الانضمام</h4>
+          <p>إرسال رسالة خاصة للعضو الجديد عند انضمامه</p>
+        </div>
+        <label class="toggle"><input type="checkbox" name="welcome_dm" <%= guildData.welcome_dm ? 'checked' : '' %>><span class="toggle-slider"></span></label>
+      </div>
+      <div class="form-group mt-2">
+        <label>💌 محتوى الرسالة الخاصة</label>
+        <textarea class="form-control" name="welcome_dm_msg" rows="2" placeholder="مرحباً {user}! يسعدنا انضمامك إلى {server} 🎉"><%= guildData.welcome_dm_msg || '' %></textarea>
+      </div>
+      <button type="submit" class="btn btn-accent"><i class="fas fa-save"></i> حفظ إعدادات الترحيب</button>
+    </div>
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ PROTECTION ══ -->
+  <div id="protection">
+    <div class="page-header">
+      <h1><i class="fas fa-shield-alt text-accent"></i> نظام الحماية</h1>
+      <p>حماية قصوى لسيرفرك من كل التهديدات</p>
+    </div>
+    <form method="POST" action="/dashboard/guild/<%= guild.id %>/protection/save">
+    <div class="card">
+      <div class="card-title"><i class="fas fa-power-off text-accent"></i> تحكم الحماية الرئيسي</div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>⚡ تفعيل الحماية الكاملة</h4>
+          <p>تفعيل أو إيقاف جميع أنظمة الحماية دفعة واحدة</p>
+        </div>
+        <label class="toggle"><input type="checkbox" name="protection_enabled" <%= (guildData.protection_enabled !== 0) ? 'checked' : '' %>><span class="toggle-slider"></span></label>
       </div>
     </div>
-
-    <!-- Content -->
-    <div class="content">
-      <form method="POST" action="/dashboard/guild/<%= guild.id %>/save">
-
-        <!-- General -->
-        <div id="general" class="card">
-          <div class="card-title"><i class="fas fa-cog"></i> الإعدادات العامة</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>🌐 لغة البوت</label>
-              <select class="form-control" name="lang">
-                <option value="ar" <%= guildData.lang === 'ar' ? 'selected' : '' %>>العربية 🇸🇦</option>
-                <option value="en" <%= guildData.lang === 'en' ? 'selected' : '' %>>English 🇺🇸</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>📋 قناة اللوقات</label>
-              <select class="form-control" name="log_channel">
-                <option value="">— اختر قناة —</option>
-                <% channels.forEach(c => { %>
-                  <option value="<%= c.id %>" <%= guildData.log_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option>
-                <% }) %>
-              </select>
-            </div>
-          </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-shield-virus text-accent"></i> أنظمة الحماية</div>
+      <% const protections = [
+        {key:'anti_spam', icon:'🚫', name:'مضاد السبام', desc:'كتم 30 ثانية عند إرسال 5 رسائل في 5 ثواني'},
+        {key:'anti_links', icon:'🔗', name:'مضاد الروابط', desc:'حذف أي رسالة تحتوي على رابط تلقائياً'},
+        {key:'anti_caps', icon:'🔡', name:'مضاد الكابس', desc:'حذف الرسائل التي تحتوي على 80%+ حروف كبيرة'},
+        {key:'anti_mention', icon:'📢', name:'مضاد المنشن الجماعي', desc:'كتم العضو عند ذكر 5 أشخاص أو أكثر'},
+        {key:'anti_server_name', icon:'📛', name:'حماية اسم السيرفر', desc:'إعادة اسم السيرفر تلقائياً إذا تغير'},
+        {key:'anti_server_icon', icon:'🖼️', name:'حماية أيقونة السيرفر', desc:'تسجيل أي تغيير للأيقونة فوراً'},
+        {key:'anti_raid', icon:'⚡', name:'مضاد الريد', desc:'تفعيل حالة طوارئ عند الاكتشاف'},
+      ]; %>
+      <% protections.forEach(p => { %>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4><%= p.icon %> <%= p.name %></h4>
+          <p><%= p.desc %></p>
         </div>
+        <label class="toggle"><input type="checkbox" name="<%= p.key %>" <%= guildData[p.key] ? 'checked' : '' %>><span class="toggle-slider"></span></label>
+      </div>
+      <% }) %>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-clipboard-list text-accent"></i> إعدادات اللوق</div>
+      <div class="form-group">
+        <label>📋 قناة سجل الحماية</label>
+        <select class="form-control" name="protection_log_channel">
+          <option value="">— معطل —</option>
+          <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.protection_log_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-accent"><i class="fas fa-save"></i> حفظ إعدادات الحماية</button>
+    </div>
+    </form>
 
-        <!-- Welcome -->
-        <div id="welcome" class="card">
-          <div class="card-title"><i class="fas fa-door-open"></i> إعدادات الترحيب</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>📢 قناة الترحيب</label>
-              <select class="form-control" name="welcome_channel">
-                <option value="">— معطل —</option>
-                <% channels.forEach(c => { %>
-                  <option value="<%= c.id %>" <%= guildData.welcome_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option>
-                <% }) %>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>💬 رسالة الترحيب ({user} {server} {count})</label>
-            <input class="form-control" name="welcome_message" placeholder="أهلاً {user} في {server}! 🎉" value="<%= guildData.welcome_message || '' %>">
-          </div>
-        </div>
-
-        <!-- Protection -->
-        <div id="protection" class="card">
-          <div class="card-title"><i class="fas fa-shield-alt"></i> إعدادات الحماية</div>
-          <div class="toggle-row">
-            <div><strong>🚫 مضاد السبام</strong><br><small style="color:var(--text2)">يكتم العضو إذا أرسل 5 رسائل في 5 ثواني</small></div>
-            <label class="toggle"><input type="checkbox" name="anti_spam" <%= guildData.anti_spam ? 'checked' : '' %>><span class="toggle-slider"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div><strong>🔗 مضاد الروابط</strong><br><small style="color:var(--text2)">يحذف الروابط تلقائياً</small></div>
-            <label class="toggle"><input type="checkbox" name="anti_links" <%= guildData.anti_links ? 'checked' : '' %>><span class="toggle-slider"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div><strong>🔡 مضاد الكابس</strong><br><small style="color:var(--text2)">يحذف الرسائل ذات الكابس الكثير</small></div>
-            <label class="toggle"><input type="checkbox" name="anti_caps" <%= guildData.anti_caps ? 'checked' : '' %>><span class="toggle-slider"></span></label>
-          </div>
-          <div class="toggle-row">
-            <div><strong>📢 مضاد المنشن الجماعي</strong><br><small style="color:var(--text2)">يحذف إذا منشن 5+ أشخاص</small></div>
-            <label class="toggle"><input type="checkbox" name="anti_mention" <%= guildData.anti_mention ? 'checked' : '' %>><span class="toggle-slider"></span></label>
-          </div>
-        </div>
-
-        <!-- Tickets -->
-        <div id="tickets" class="card">
-          <div class="card-title"><i class="fas fa-ticket-alt"></i> نظام التذاكر</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>🎫 الحد الأقصى للتذاكر (1-10)</label>
-              <input type="number" class="form-control" name="max_tickets" min="1" max="10" value="<%= guildData.max_tickets || 5 %>">
-            </div>
-          </div>
-          <div style="background:var(--bg3);border-radius:10px;padding:1rem;margin-top:.5rem;">
-            <p style="font-size:.85rem;color:var(--text2);">📝 لإعداد لوحة التذاكر، استخدم:</p>
-            <code style="background:var(--bg);padding:.3rem .6rem;border-radius:6px;font-size:.85rem;">/ticket setup</code> ثم <code style="background:var(--bg);padding:.3rem .6rem;border-radius:6px;font-size:.85rem;">/ticket panel</code>
-          </div>
-          <% if (tickets.length > 0) { %>
-          <div class="table-wrap" style="margin-top:1rem;">
-            <table><tr><th>المستخدم</th><th>الحالة</th><th>التاريخ</th></tr>
-            <% tickets.forEach(t => { %><tr><td><@<%= t.user_id %>></td><td><span class="server-badge <%= t.status==='open'?'badge-bot':'badge-nobot' %>"><%= t.status==='open'?'✅ مفتوح':'🔒 مغلق' %></span></td><td style="font-size:.8rem;color:var(--text2);"><%= t.created_at %></td></tr><% }) %>
-            </table>
-          </div>
-          <% } %>
-        </div>
-
-        <!-- Levels -->
-        <div id="levels" class="card">
-          <div class="card-title"><i class="fas fa-chart-line"></i> نظام المستويات</div>
-          <div class="form-group">
-            <label>📢 قناة إعلانات المستوى</label>
-            <select class="form-control" name="level_channel">
-              <option value="">— معطل —</option>
-              <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.level_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
-            </select>
-          </div>
-          <% if (topMembers.length > 0) { %>
-          <h4 style="margin:.8rem 0 .5rem;font-size:.9rem;">🏆 Top 5</h4>
-          <% topMembers.forEach((m,i) => { const medals=['🥇','🥈','🥉']; %>
-          <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem;">
-            <span><%= medals[i]||`#${i+1}` %> <@<%= m.user_id %>></span>
-            <span style="color:var(--text2);">Lv.<%= m.level %> — <%= m.xp %> XP</span>
-          </div>
-          <% }) %>
-          <% } %>
-        </div>
-
-        <div style="text-align:center;margin:2rem 0;">
-          <button type="submit" class="btn btn-accent" style="padding:.8rem 3rem;font-size:1rem;"><i class="fas fa-save"></i> حفظ الإعدادات</button>
-        </div>
+    <!-- Whitelist -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-list-ul text-accent"></i> القائمة البيضاء
+        <span class="badge badge-green"><%= whitelist ? whitelist.length : 0 %> مستخدم</span>
+      </div>
+      <form method="POST" action="/dashboard/guild/<%= guild.id %>/whitelist/add" style="display:flex;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <input class="form-control" name="user_id" placeholder="User ID" style="flex:1;min-width:200px;" required>
+        <select class="form-control" name="bypass_all" style="max-width:200px;">
+          <option value="0">حماية جزئية</option>
+          <option value="1">تجاوز كامل</option>
+        </select>
+        <button class="btn btn-success btn-sm" type="submit"><i class="fas fa-plus"></i> إضافة</button>
       </form>
-
-      <!-- Auto Respond -->
-      <div id="autorespond" class="card">
-        <div class="card-title"><i class="fas fa-robot"></i> الردود التلقائية (<%= autoresponds.length %>)</div>
-        <form method="POST" action="/dashboard/guild/<%= guild.id %>/autorespond/add" style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:.8rem;align-items:end;margin-bottom:1rem;">
-          <div><label style="font-size:.8rem;color:var(--text2);">الكلمة المشغلة</label><input class="form-control" name="trigger" placeholder="مثال: هلا" required></div>
-          <div><label style="font-size:.8rem;color:var(--text2);">الرد</label><input class="form-control" name="response" placeholder="مثال: هلا والله!" required></div>
-          <div><label style="font-size:.8rem;color:var(--text2);">النوع</label><select class="form-control" name="match_type"><option value="exact">كاملة</option><option value="contains">يحتوي</option><option value="startswith">يبدأ بـ</option></select></div>
-          <button type="submit" class="btn btn-accent"><i class="fas fa-plus"></i></button>
-        </form>
-        <% if (autoresponds.length > 0) { %>
-        <div class="table-wrap"><table>
-          <tr><th>الكلمة</th><th>الرد</th><th>النوع</th><th>الحالة</th><th>حذف</th></tr>
-          <% autoresponds.forEach(r => { %>
+      <% if (whitelist && whitelist.length) { %>
+      <div class="table-wrap">
+        <table>
+          <tr><th>المستخدم</th><th>النوع</th><th>حذف</th></tr>
+          <% whitelist.forEach(w => { %>
           <tr>
-            <td><code><%= r.trigger %></code></td>
-            <td><%= r.response.substring(0,40) %><%= r.response.length>40?'...':'' %></td>
-            <td style="font-size:.8rem;color:var(--text2);"><%= r.match_type %></td>
-            <td><span class="server-badge <%= r.enabled?'badge-bot':'badge-nobot' %>"><%= r.enabled?'✅ مفعل':'❌ معطل' %></span></td>
-            <td><form method="POST" action="/dashboard/guild/<%= guild.id %>/autorespond/delete/<%= r.id %>" style="display:inline;"><button type="submit" class="btn btn-danger" style="padding:.3rem .6rem;font-size:.8rem;">🗑️</button></form></td>
+            <td><code><%= w.user_id %></code></td>
+            <td><span class="badge <%= w.bypass_all ? 'badge-gold' : 'badge-blue' %>"><%= w.bypass_all ? '🔓 تجاوز كامل' : '🔒 جزئي' %></span></td>
+            <td>
+              <form method="POST" action="/dashboard/guild/<%= guild.id %>/whitelist/remove/<%= w.user_id %>" style="display:inline;">
+                <button class="btn btn-danger btn-sm" type="submit"><i class="fas fa-trash"></i></button>
+              </form>
+            </td>
           </tr>
           <% }) %>
-        </table></div>
-        <% } else { %><p style="color:var(--text2);text-align:center;padding:1rem;">لا توجد ردود تلقائية</p><% } %>
+        </table>
       </div>
-
-      <!-- Commands & Shortcuts -->
-      <div id="commands" class="card">
-        <div class="card-title"><i class="fas fa-terminal"></i> اختصارات الأوامر</div>
-        <form method="POST" action="/dashboard/guild/<%= guild.id %>/command/shortcut" style="display:grid;grid-template-columns:1fr 1fr auto;gap:.8rem;align-items:end;margin-bottom:1rem;">
-          <div><label style="font-size:.8rem;color:var(--text2);">اسم الأمر</label><input class="form-control" name="command_name" placeholder="مثال: ban" required></div>
-          <div><label style="font-size:.8rem;color:var(--text2);">الاختصار (اكتبه في الشات)</label><input class="form-control" name="shortcut" placeholder="مثال: !ban" required></div>
-          <button type="submit" class="btn btn-accent"><i class="fas fa-plus"></i></button>
-        </form>
-        <% if (commands.length > 0) { %>
-        <div class="table-wrap"><table>
-          <tr><th>الأمر</th><th>الاختصار</th></tr>
-          <% commands.forEach(c => { %><tr><td>/<%= c.command_name %></td><td><code><%= c.shortcut || '—' %></code></td></tr><% }) %>
-        </table></div>
-        <% } %>
-      </div>
-
-      <!-- Logs -->
-      <div id="logs" class="card">
-        <div class="card-title"><i class="fas fa-list"></i> آخر اللوقات</div>
-        <% if (logs.length > 0) { %>
-        <div class="table-wrap"><table>
-          <tr><th>النوع</th><th>المشرف</th><th>المستهدف</th><th>التفاصيل</th><th>التاريخ</th></tr>
-          <% logs.forEach(l => { %>
-          <tr><td><span class="server-badge badge-bot"><%= l.type %></span></td><td style="font-size:.8rem;"><@<%= l.user_id %>></td><td style="font-size:.8rem;"><@<%= l.target_id %>></td><td style="font-size:.8rem;color:var(--text2);"><%= (l.details||'').substring(0,30) %></td><td style="font-size:.75rem;color:var(--text2);"><%= l.created_at %></td></tr>
-          <% }) %>
-        </table></div>
-        <% } else { %><p style="color:var(--text2);text-align:center;padding:1rem;">لا توجد لوقات</p><% } %>
-      </div>
-
+      <% } else { %>
+        <p style="color:var(--text2);font-size:.88rem;">📭 القائمة البيضاء فارغة</p>
+      <% } %>
     </div>
   </div>
+
+  <hr class="divider">
+
+  <!-- ══ TICKETS ══ -->
+  <div id="tickets">
+    <div class="page-header">
+      <h1><i class="fas fa-ticket-alt text-accent"></i> نظام التذاكر</h1>
+      <p>إدارة كاملة لنظام الدعم والتذاكر</p>
+    </div>
+    <form method="POST" action="/dashboard/guild/<%= guild.id %>/tickets/save">
+    <div class="card">
+      <div class="card-title"><i class="fas fa-cog text-accent"></i> إعدادات التذاكر</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📁 فئة التذاكر</label>
+          <select class="form-control" name="ticket_category">
+            <option value="">— اختر فئة —</option>
+            <% categories.forEach(c => { %><option value="<%= c.id %>" <%= guildData.ticket_category === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>🔢 الحد الأقصى للتذاكر <%= premium ? '<span class="badge badge-gold">∞ بريميوم</span>' : '' %></label>
+          <input class="form-control" type="number" name="max_tickets" min="1" max="<%= premium ? 999 : 50 %>" value="<%= guildData.max_tickets || 5 %>" <%= premium ? '' : 'max="50"' %>>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📋 قناة لوق التذاكر</label>
+          <select class="form-control" name="ticket_log_channel">
+            <option value="">— معطل —</option>
+            <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.ticket_log_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>🎨 لون زر التذكرة</label>
+          <select class="form-control" name="ticket_button_color">
+            <option value="Primary" <%= (guildData.ticket_button_color||'Primary') === 'Primary' ? 'selected' : '' %>>🔵 أزرق</option>
+            <option value="Success" <%= guildData.ticket_button_color === 'Success' ? 'selected' : '' %>>🟢 أخضر</option>
+            <option value="Danger" <%= guildData.ticket_button_color === 'Danger' ? 'selected' : '' %>>🔴 أحمر</option>
+            <option value="Secondary" <%= guildData.ticket_button_color === 'Secondary' ? 'selected' : '' %>>⚫ رمادي</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>🏷️ نص زرار التذكرة</label>
+          <input class="form-control" name="ticket_button_label" placeholder="🎫 فتح تذكرة" value="<%= guildData.ticket_button_label || '🎫 فتح تذكرة' %>">
+        </div>
+        <div class="form-group">
+          <label>📌 عنوان لوحة التذاكر</label>
+          <input class="form-control" name="ticket_panel_title" placeholder="🎫 نظام التذاكر" value="<%= guildData.ticket_panel_title || '🎫 نظام التذاكر' %>">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>📝 رسالة لوحة التذاكر</label>
+        <textarea class="form-control" name="ticket_panel_message" rows="2" placeholder="اضغط على الزر لفتح تذكرة دعم"><%= guildData.ticket_panel_message || '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>📢 القناة لنشر اللوحة فيها</label>
+        <div style="display:flex;gap:.8rem;">
+          <select class="form-control" name="panel_channel">
+            <option value="">— اختر قناة —</option>
+            <% channels.forEach(c => { %><option value="<%= c.id %>">#<%= c.name %></option><% }) %>
+          </select>
+          <button type="submit" name="action" value="publish_panel" class="btn btn-success btn-sm" style="white-space:nowrap;"><i class="fas fa-paper-plane"></i> نشر</button>
+        </div>
+      </div>
+      <button type="submit" name="action" value="save" class="btn btn-accent"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+    </div>
+    </form>
+
+    <!-- Active Tickets Table -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-list text-accent"></i> التذاكر الأخيرة</div>
+      <% if (tickets && tickets.length) { %>
+      <div class="table-wrap">
+        <table>
+          <tr><th>#</th><th>المستخدم</th><th>الحالة</th><th>التاريخ</th></tr>
+          <% tickets.forEach(t => { %>
+          <tr>
+            <td><strong>#<%= t.ticket_number || t.id %></strong></td>
+            <td><code><%= t.user_id %></code></td>
+            <td><span class="badge <%= t.status === 'open' ? 'badge-green' : 'badge-red' %>"><%= t.status === 'open' ? '✅ مفتوحة' : '🔒 مغلقة' %></span></td>
+            <td style="color:var(--text2);font-size:.8rem;"><%= t.created_at ? t.created_at.split('T')[0] : '—' %></td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+      <% } else { %><p style="color:var(--text2);font-size:.88rem;">📭 لا توجد تذاكر بعد</p><% } %>
+    </div>
   </div>
-  <script src="/js/main.js"></script>
+
+  <hr class="divider">
+
+  <!-- ══ LEVELS ══ -->
+  <div id="levels">
+    <div class="page-header">
+      <h1><i class="fas fa-chart-line text-accent"></i> نظام المستويات</h1>
+      <p>تخصيص نظام XP والمستويات</p>
+    </div>
+    <form method="POST" action="/dashboard/guild/<%= guild.id %>/levels/save">
+    <div class="card">
+      <div class="card-title"><i class="fas fa-cog text-accent"></i> إعدادات المستويات</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📢 قناة إعلانات المستوى</label>
+          <select class="form-control" name="level_channel">
+            <option value="">— معطل —</option>
+            <% channels.forEach(c => { %><option value="<%= c.id %>" <%= guildData.level_channel === c.id ? 'selected' : '' %>>#<%= c.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📩 إشعار المستوى</label>
+          <select class="form-control" name="level_notify">
+            <option value="channel">في القناة المحددة</option>
+            <option value="dm" <%= guildData.level_dm ? 'selected' : '' %>>رسالة خاصة</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>💬 رسالة ترقي المستوى</label>
+        <small style="color:var(--text2);display:block;margin-bottom:.4rem;">المتغيرات: <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{user}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{level}</code> <code style="background:var(--bg3);padding:.1rem .3rem;border-radius:4px;">{username}</code></small>
+        <input class="form-control" name="level_msg" placeholder="🎉 {user} وصل للمستوى {level}! 🏆" value="<%= guildData.level_msg || '' %>">
+      </div>
+      <button type="submit" class="btn btn-accent"><i class="fas fa-save"></i> حفظ</button>
+    </div>
+    </form>
+
+    <!-- Level Roles -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-trophy text-accent"></i> رتب المستويات
+        <span class="badge badge-blue">رتبة لكل مستوى</span>
+      </div>
+      <form method="POST" action="/dashboard/guild/<%= guild.id %>/levels/role/add" style="display:flex;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <input class="form-control" type="number" name="level" placeholder="المستوى (مثال: 5)" min="1" max="999" style="max-width:180px;" required>
+        <select class="form-control" name="role_id" style="flex:1;min-width:200px;">
+          <option value="">— اختر رتبة —</option>
+          <% roles.forEach(r => { %><option value="<%= r.id %>"><%= r.name %></option><% }) %>
+        </select>
+        <button class="btn btn-success btn-sm" type="submit"><i class="fas fa-plus"></i> إضافة</button>
+      </form>
+      <% if (levelRoles && levelRoles.length) { %>
+      <div class="table-wrap">
+        <table>
+          <tr><th>المستوى</th><th>الرتبة</th><th>حذف</th></tr>
+          <% levelRoles.forEach(lr => { const role = roles.find(r => r.id === lr.role_id); %>
+          <tr>
+            <td><span class="badge badge-purple">Lv.<%= lr.level %></span></td>
+            <td><%= role ? role.name : lr.role_id %></td>
+            <td>
+              <form method="POST" action="/dashboard/guild/<%= guild.id %>/levels/role/delete/<%= lr.level %>" style="display:inline;">
+                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+      <% } else { %><p style="color:var(--text2);font-size:.88rem;">📭 لا توجد رتب مستويات بعد</p><% } %>
+    </div>
+
+    <!-- Top Members -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-crown text-gold"></i> لوحة المتصدرين</div>
+      <% if (topMembers && topMembers.length) { %>
+        <% topMembers.forEach((m, i) => {
+          const nextLevelXP = Math.pow(m.level + 1, 2) * 50;
+          const pct = Math.min(100, Math.floor((m.xp / nextLevelXP) * 100));
+        %>
+        <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.04);">
+          <span style="font-size:1.3rem;width:30px;text-align:center;"><%= ['🥇','🥈','🥉','4️⃣','5️⃣'][i] %></span>
+          <code style="color:var(--text2);font-size:.8rem;flex:1;"><%= m.user_id %></code>
+          <div style="flex:2;">
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text2);margin-bottom:.3rem;">
+              <span>Lv.<strong style="color:var(--accent)"><%= m.level %></strong></span>
+              <span><%= m.xp %> XP (<%= pct %>%)</span>
+            </div>
+            <div class="xp-bar-wrap"><div class="xp-bar" style="width:<%= pct %>%"></div></div>
+          </div>
+          <span style="color:var(--text2);font-size:.78rem;"><%= m.messages %> رسالة</span>
+        </div>
+        <% }) %>
+      <% } else { %><p style="color:var(--text2);font-size:.88rem;">📭 لا يوجد أعضاء بعد</p><% } %>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ AUTO ROLES ══ -->
+  <div id="autoroles">
+    <div class="page-header">
+      <h1><i class="fas fa-user-tag text-accent"></i> الرتب التلقائية</h1>
+      <p>رتب تُضاف تلقائياً عند الانضمام للسيرفر</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-user-plus text-accent"></i> إضافة رتبة تلقائية</div>
+      <form method="POST" action="/dashboard/guild/<%= guild.id %>/autoroles/add" style="display:flex;gap:.8rem;flex-wrap:wrap;">
+        <select class="form-control" name="role_id" style="flex:1;min-width:200px;" required>
+          <option value="">— اختر رتبة —</option>
+          <% roles.forEach(r => { %><option value="<%= r.id %>"><%= r.name %></option><% }) %>
+        </select>
+        <select class="form-control" name="type" style="max-width:160px;">
+          <option value="member">👤 أعضاء</option>
+          <option value="bot">🤖 بوتات</option>
+        </select>
+        <button class="btn btn-success btn-sm" type="submit"><i class="fas fa-plus"></i> إضافة</button>
+      </form>
+      <% if (autoRoles && autoRoles.length) { %>
+      <div class="table-wrap" style="margin-top:1rem;">
+        <table>
+          <tr><th>الرتبة</th><th>النوع</th><th>حذف</th></tr>
+          <% autoRoles.forEach(ar => { const role = roles.find(r => r.id === ar.role_id); %>
+          <tr>
+            <td><%= role ? role.name : ar.role_id %></td>
+            <td><span class="badge <%= ar.type === 'bot' ? 'badge-purple' : 'badge-blue' %>"><%= ar.type === 'bot' ? '🤖 بوتات' : '👤 أعضاء' %></span></td>
+            <td>
+              <form method="POST" action="/dashboard/guild/<%= guild.id %>/autoroles/delete/<%= ar.id %>" style="display:inline;">
+                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+      <% } else { %><p style="color:var(--text2);font-size:.88rem;margin-top:1rem;">📭 لا توجد رتب تلقائية</p><% } %>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ SHORTCUTS ══ -->
+  <div id="shortcuts">
+    <div class="page-header">
+      <h1><i class="fas fa-bolt text-accent"></i> اختصارات الأوامر</h1>
+      <p>اعمل اختصار لأي أمر بدون برفكس — مثل بروبوت!</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-plus-circle text-accent"></i> إضافة اختصار</div>
+      <form method="POST" action="/dashboard/guild/<%= guild.id %>/shortcuts/add" style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="flex:1;min-width:140px;margin:0;">
+          <label>⌨️ الاختصار</label>
+          <input class="form-control" name="shortcut" placeholder="مثال: هلع" required>
+        </div>
+        <div class="form-group" style="flex:2;min-width:200px;margin:0;">
+          <label>🔧 الأمر المرتبط</label>
+          <select class="form-control" name="command_name" required>
+            <option value="">— اختر أمراً —</option>
+            <% const cmdList = ['ban','kick','mute','unmute','warn','warnings','purge','lock','unlock','slowmode','addrole','removerole','nickname','rename','come','unban','ping','avatar','userinfo','serverinfo','botinfo','help','decoration','afk','giveaway','tax','poll','suggest','translate','weather','rank','leaderboard','ticket','protection','roulette','dice','coinflip','rps']; %>
+            <% cmdList.forEach(c => { %><option value="<%= c %>">/<%= c %></option><% }) %>
+          </select>
+        </div>
+        <button class="btn btn-success" type="submit" style="height:42px;"><i class="fas fa-plus"></i> إضافة</button>
+      </form>
+
+      <% if (shortcuts && shortcuts.length) { %>
+      <div style="margin-top:1.2rem;">
+        <div style="font-size:.8rem;color:var(--text2);margin-bottom:.6rem;">الاختصارات الحالية (يمكن إضافة ما لا نهاية!)</div>
+        <div class="shortcut-list">
+          <% shortcuts.forEach(s => { %>
+          <div class="shortcut-item">
+            <span class="shortcut-key"><%= s.shortcut %></span>
+            <span class="shortcut-arrow">→</span>
+            <span class="shortcut-cmd">/<%= s.command_name %></span>
+            <form method="POST" action="/dashboard/guild/<%= guild.id %>/shortcuts/delete/<%= s.id %>" style="margin-right:auto;">
+              <button class="btn btn-danger btn-sm" style="padding:.3rem .7rem;"><i class="fas fa-trash"></i></button>
+            </form>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } else { %>
+        <p style="color:var(--text2);font-size:.88rem;margin-top:1rem;">📭 لا توجد اختصارات بعد — أضف ما تشاء!</p>
+      <% } %>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ AUTORESPOND ══ -->
+  <div id="autorespond">
+    <div class="page-header">
+      <h1><i class="fas fa-robot text-accent"></i> الردود التلقائية</h1>
+      <p>ردود ذكية على رسائل الأعضاء</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-plus text-accent"></i> إضافة رد تلقائي</div>
+      <form method="POST" action="/dashboard/guild/<%= guild.id %>/autorespond/add">
+        <div class="form-row">
+          <div class="form-group">
+            <label>🎯 الكلمة المحرّكة</label>
+            <input class="form-control" name="trigger" placeholder="مثال: هلا" required>
+          </div>
+          <div class="form-group">
+            <label>🔍 نوع المطابقة</label>
+            <select class="form-control" name="match_type">
+              <option value="exact">مطابقة كاملة</option>
+              <option value="contains">يحتوي على</option>
+              <option value="startswith">يبدأ بـ</option>
+              <option value="endswith">ينتهي بـ</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>💬 الرد</label>
+          <textarea class="form-control" name="response" rows="2" placeholder="الرد التلقائي هنا..." required></textarea>
+        </div>
+        <button class="btn btn-accent btn-sm" type="submit"><i class="fas fa-plus"></i> إضافة</button>
+      </form>
+    </div>
+    <% if (autoresponds && autoresponds.length) { %>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-list text-accent"></i> الردود المضافة (<%= autoresponds.length %>)</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>المحرّك</th><th>النوع</th><th>الرد</th><th>حذف</th></tr>
+          <% autoresponds.forEach(r => { %>
+          <tr>
+            <td><code style="color:var(--accent)"><%= r.trigger %></code></td>
+            <td><span class="badge badge-blue"><%= r.match_type %></span></td>
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);"><%= r.response %></td>
+            <td>
+              <form method="POST" action="/dashboard/guild/<%= guild.id %>/autorespond/delete/<%= r.id %>" style="display:inline;">
+                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══ LOGS ══ -->
+  <div id="logs">
+    <div class="page-header">
+      <h1><i class="fas fa-list-alt text-accent"></i> سجل الإجراءات</h1>
+      <p>آخر الإجراءات في السيرفر</p>
+    </div>
+    <div class="card">
+      <% if (logs && logs.length) { %>
+      <div class="table-wrap">
+        <table>
+          <tr><th>النوع</th><th>المنفّذ</th><th>الهدف</th><th>التفاصيل</th><th>الوقت</th></tr>
+          <% logs.forEach(l => { %>
+          <tr>
+            <td><span class="badge badge-blue"><%= l.type %></span></td>
+            <td><code style="font-size:.75rem;"><%= l.user_id || '—' %></code></td>
+            <td><code style="font-size:.75rem;"><%= l.target_id || '—' %></code></td>
+            <td style="color:var(--text2);font-size:.82rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;"><%= l.details || '—' %></td>
+            <td style="color:var(--text3);font-size:.75rem;"><%= l.created_at ? l.created_at.split('T')[0] : '—' %></td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+      <% } else { %><p style="color:var(--text2);font-size:.88rem;">📭 لا يوجد سجل بعد</p><% } %>
+    </div>
+  </div>
+
+</div><!-- /content -->
+</div><!-- /dashboard-layout -->
+</div>
+
+<script>
+function setActive(el) {
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  el.classList.add('active');
+}
+// Smooth scroll + active on scroll
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('[id]');
+  const links = document.querySelectorAll('.sidebar-link[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
 </body>
 </html>

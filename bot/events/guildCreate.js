@@ -1,28 +1,54 @@
 const { EmbedBuilder } = require('discord.js');
-const { ensureGuild } = require('../database');
+const { ensureGuild, updateGuild } = require('../database');
 
 module.exports = {
   name: 'guildCreate',
-  async execute(guild, client) {
-    await ensureGuild(guild.id);
-    console.log(`➕ Joined: ${guild.name} (${guild.id})`);
+  async execute(guild) {
     try {
-      const me = await guild.members.fetchMe();
-      await me.setNickname(guild.name).catch(() => {});
-    } catch {}
-    const ch = guild.channels.cache.find(c => c.type === 0 && c.permissionsFor(guild.members.me)?.has('SendMessages'));
-    if (ch) {
+      ensureGuild(guild.id);
+      // Save original server name and icon for protection
+      updateGuild(guild.id, {
+        original_server_name: guild.name,
+        original_server_icon: guild.icon || null
+      });
+
+      // Find best channel to send setup message
+      const ch = guild.channels.cache
+        .filter(c => c.type === 0 && c.permissionsFor(guild.members.me)?.has('SendMessages'))
+        .sort((a, b) => a.position - b.position)
+        .first();
+
+      if (!ch) return;
+
+      const dashURL = process.env.BASE_URL || 'https://your-dashboard.railway.app';
       const embed = new EmbedBuilder()
-        .setColor('#5865F2').setTitle('👋 مرحباً! أنا Xtra Bot')
-        .setDescription('شكراً لإضافتي! 🎉\n\nاستخدم `/help` لعرض جميع الأوامر\nUse `/help` to see all commands')
+        .setColor('#5865F2')
+        .setTitle('⚡ شكراً لإضافة Xtra Bot!')
+        .setDescription([
+          '> أهلاً بك في **Xtra Bot** — أقوى بوت ديسكورد عربي!',
+          '',
+          '**🚀 للبدء:**',
+          `ادخل على الداشبورد من الرابط أدناه وقم بضبط إعدادات سيرفرك`,
+          '',
+          '**📋 ميزات البوت:**',
+          '`🎫` نظام تذاكر متكامل',
+          '`🛡️` حماية قصوى للسيرفر',
+          '`📊` نظام مستويات وXP',
+          '`🤖` ردود تلقائية',
+          '`🎮` ألعاب تفاعلية',
+          '`💎` ميزات البريميوم',
+          '',
+          '> اكتب `/help` لرؤية جميع الأوامر'
+        ].join('\n'))
+        .setThumbnail(guild.client.user.displayAvatarURL())
         .addFields(
-          { name: '📋 الأوامر', value: '`/help`', inline: true },
-          { name: '⚙️ الإعداد', value: '`/setwelcome` `/setlog`', inline: true },
-          { name: '📱 الدعم', value: '[واتساب](https://wa.me/201069181060) | [ديسكورد](https://discord.gg/7UtgNs6xfK)', inline: true }
+          { name: '🌐 الداشبورد', value: `[اضغط هنا](${dashURL}/dashboard)`, inline: true },
+          { name: '💬 الدعم', value: '[سيرفر الدعم](https://discord.gg/7UtgNs6xfK)', inline: true }
         )
-        .setThumbnail(client.user.displayAvatarURL())
-        .setFooter({ text: 'Xtra Bot • Developed by STEVEN ❤️' });
-      await ch.send({ embeds: [embed] }).catch(() => {});
-    }
+        .setFooter({ text: `Xtra Bot v2.0 • ${guild.name}` })
+        .setTimestamp();
+
+      await ch.send({ embeds: [embed] });
+    } catch (e) { console.error('guildCreate error:', e.message); }
   }
 };

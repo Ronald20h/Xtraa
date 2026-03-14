@@ -1,18 +1,19 @@
 <nav class="navbar">
-  <a href="/" class="nav-brand" style="text-decoration:none;display:flex;align-items:center;gap:.6rem;">
+  <a href="/" class="nav-brand">
     <div class="brand-logo">X</div>
     <span class="brand-name">Xtra</span>
+    <span class="brand-version">v2.0</span>
   </a>
   <div class="nav-links">
-    <a href="/" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
-    <a href="/commands" class="nav-link"><i class="fas fa-terminal"></i> الأوامر</a>
-    <a href="/premium" class="nav-link premium-link"><i class="fas fa-crown"></i> بريميوم</a>
-    <button class="lang-btn" onclick="toggleLang()">🌐 EN/AR</button>
+    <a href="/" class="nav-link"><i class="fas fa-home"></i> <span>الرئيسية</span></a>
+    <a href="/commands" class="nav-link"><i class="fas fa-terminal"></i> <span>الأوامر</span></a>
+    <a href="/premium" class="nav-link premium-link"><i class="fas fa-crown"></i> <span>بريميوم</span></a>
+    <button class="lang-btn" onclick="toggleLang()">🌐 EN</button>
     <% if (typeof user !== 'undefined' && user) { %>
-      <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>داشبورد</span></a>
       <div class="user-menu">
-        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" class="user-avatar" alt="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
-        <span><%= user.username %></span>
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" class="user-avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" alt="">
+        <span class="user-name"><%= user.username %></span>
         <a href="/auth/logout" class="logout-btn" title="خروج"><i class="fas fa-sign-out-alt"></i></a>
       </div>
     <% } else { %>
