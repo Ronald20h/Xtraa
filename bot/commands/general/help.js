@@ -1,184 +1,72 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { prefixDB } = require('../../db-manager');
+const config = require('../../config');
 
-const CATEGORIES = {
-  'عام 🌐': {
-    emoji: '🌐', color: '#5865f2',
-    commands: [
-      {n:'help',a:['مساعدة','اوامر','h','?']},
-      {n:'ping',a:['بنق','بينق','p']},
-      {n:'avatar',a:['صورة','صوره','pfp','av']},
-      {n:'userinfo',a:['يوزر','معلومات','ui','who']},
-      {n:'serverinfo',a:['سيرفر','si']},
-      {n:'botinfo',a:['بوت','bi']},
-      {n:'membercount',a:['اعضاء','عدد','mc']},
-      {n:'channelinfo',a:['قناة','ci']},
-      {n:'roleinfo',a:['رتبة-معلومات','ri']},
-      {n:'uptime',a:['وقت-التشغيل','ut']},
-      {n:'guildicon',a:['أيقونة','icon']},
-      {n:'banner',a:['بانر']},
-      {n:'stickers',a:['ستيكرات','sticker']},
-      {n:'snipe',a:['سناب','محذوفة']},
-      {n:'enlarge',a:['كبر','تكبير']},
-    ]
-  },
-  'أدوات 🔧': {
-    emoji: '🔧', color: '#00d4ff',
-    commands: [
-      {n:'decoration',a:['زخرف','زخرفة','deco']},
-      {n:'calculator',a:['حاسبة','calc','احسب']},
-      {n:'math',a:['رياضيات','حسابات']},
-      {n:'percentage',a:['نسبة','%']},
-      {n:'tax',a:['ضريبة','ضريبه']},
-      {n:'color',a:['لون','colour']},
-      {n:'reverse',a:['اعكس','عكس','flip']},
-      {n:'password',a:['باسورد','كلمة-مرور','pass']},
-      {n:'age',a:['عمر','ميلاد']},
-      {n:'timer',a:['مؤقت','عداد']},
-      {n:'choice',a:['اختر','عشوائي','random']},
-      {n:'translate',a:['ترجم']},
-      {n:'weather',a:['طقس','جو']},
-      {n:'poll',a:['استطلاع','تصويت','vote']},
-      {n:'suggest',a:['اقتراح','فكرة']},
-      {n:'remindme',a:['ذكرني','تذكير','remind']},
-      {n:'afk',a:['غياب','مشغول','بعيد']},
-    ]
-  },
-  'مرح 🎉': {
-    emoji: '🎉', color: '#ff69b4',
-    commands: [
-      {n:'8ball',a:['كرة','تنبأ','ball']},
-      {n:'iq',a:['ذكاء','عقل']},
-      {n:'ship',a:['شيب','توافق','حب']},
-      {n:'rate',a:['قيّم','تقييم']},
-      {n:'pp',a:['قوة','طاقة']},
-      {n:'slap',a:['صفع','صفعة']},
-      {n:'hug',a:['حضن','احضن']},
-      {n:'joke',a:['نكتة','نكت','اضحك']},
-      {n:'fact',a:['معلومة','هل-تعلم','info']},
-      {n:'quote',a:['اقتباس','حكمة']},
-      {n:'say',a:['قل','ارسل','msg']},
-    ]
-  },
-  'إدارة 🛡️': {
-    emoji: '🛡️', color: '#e74c3c',
-    commands: [
-      {n:'ban',a:['حظر','بان']},
-      {n:'tempban',a:['حظر-مؤقت','تبان']},
-      {n:'kick',a:['طرد','اطرد','kk']},
-      {n:'mute',a:['كتم','اكتم','سكوت']},
-      {n:'unmute',a:['فك','رفع-كتم']},
-      {n:'warn',a:['تحذير','حذر','w']},
-      {n:'warnings',a:['تحذيرات','ws']},
-      {n:'clearwarnings',a:['مسح-تحذيرات','cw']},
-      {n:'note',a:['ملاحظة','note']},
-      {n:'purge',a:['مسح','clear','احذف','del']},
-      {n:'lock',a:['قفل','اقفل','lk']},
-      {n:'unlock',a:['فتح','افتح','ulk']},
-      {n:'hide',a:['اخفي','إخفاء','h']},
-      {n:'show',a:['اظهر','إظهار']},
-      {n:'slowmode',a:['بطيء','slow','sm']},
-      {n:'nuke',a:['نظف','bomb']},
-      {n:'announce',a:['اعلان','إعلان','ann']},
-      {n:'massrole',a:['رتبة-للكل','mass']},
-      {n:'addrole',a:['اضف-رتبة','ar']},
-      {n:'removerole',a:['ازل-رتبة','rr']},
-      {n:'createrole',a:['انشئ-رتبة','cr']},
-      {n:'deleterole',a:['احذف-رتبة','dr']},
-      {n:'rolename',a:['اسم-رتبة','rn']},
-      {n:'rolecolor',a:['لون-رتبة','rc']},
-      {n:'rename',a:['اسم','غير-اسم']},
-      {n:'nickname',a:['لقب','nick']},
-      {n:'come',a:['تعال','هنا','نداء','call']},
-      {n:'move',a:['انقل','نقل']},
-      {n:'voicekick',a:['طرد-صوتي','vk']},
-      {n:'deafen',a:['اصمم','صمم']},
-      {n:'unban',a:['رفع-حظر','ub']},
-      {n:'logs',a:['سجل','لوق','log']},
-    ]
-  },
-  'تذاكر 🎫': {
-    emoji: '🎫', color: '#5865f2',
-    commands: [
-      {n:'ticket setup',a:['تذكرة-إعداد']},
-      {n:'ticket panel',a:['تذكرة-لوحة']},
-      {n:'ticket close',a:['اغلق-تذكرة','إغلاق']},
-      {n:'ticket claim',a:['استلم-تذكرة']},
-      {n:'ticket add',a:['اضف-للتذكرة']},
-      {n:'ticket remove',a:['ازل-من-تذكرة']},
-      {n:'ticket rename',a:['اسم-تذكرة']},
-      {n:'ticket list',a:['قائمة-تذاكر']},
-    ]
-  },
-  'مستويات 📊': {
-    emoji: '📊', color: '#9b59b6',
-    commands: [
-      {n:'rank',a:['رتبة','رتبتي','xp','مستوى']},
-      {n:'leaderboard',a:['lb','متصدرين','top']},
-      {n:'setxp',a:['xp-عدل','عدل-xp']},
-    ]
-  },
-  'ألعاب 🎮': {
-    emoji: '🎮', color: '#e67e22',
-    commands: [
-      {n:'roulette',a:['روليت','عجلة','rl']},
-      {n:'xo',a:['اكس','إكس','ttt']},
-      {n:'dice',a:['نرد','زهر','roll']},
-      {n:'coinflip',a:['عملة','flip','cf']},
-      {n:'rps',a:['حجرة','ورقة-مقص']},
-      {n:'guess',a:['خمن','خمّن','رقم']},
-      {n:'trivia',a:['اختبار','معلومة','tv']},
-    ]
-  },
-  'هبات 🎉': {
-    emoji: '🎁', color: '#ffd700',
-    commands: [
-      {n:'giveaway start',a:['هبة','gw','give']},
-      {n:'giveaway end',a:['انهاء-هبة']},
-      {n:'giveaway reroll',a:['اعد-سحب']},
-      {n:'giveaway list',a:['قائمة-هبات']},
-    ]
-  },
-  'حماية 🔐': {
-    emoji: '🔐', color: '#e74c3c',
-    commands: [
-      {n:'protection status',a:['حماية','prot']},
-      {n:'protection enable-all',a:['فعل-حماية']},
-      {n:'protection whitelist-add',a:['whitelist','ابيض']},
-    ]
-  },
+const CATS = {
+  general:    { emoji:'🌟', label:'عام',           color:0x7c3aed, cmds:[{n:'ping',d:'سرعة البوت'},{n:'help',d:'قائمة الأوامر'},{n:'server',d:'معلومات السيرفر'},{n:'user',d:'معلومات عضو'},{n:'avatar',d:'صورة عضو'},{n:'banner',d:'بانر عضو'},{n:'decoration',d:'زخرفة الكلام (25 شكل)'},{n:'decorate',d:'زخرفة (نسخة بريفكس)'},{n:'tax',d:'حساب الضريبة'},{n:'embed',d:'إرسال embed'},{n:'dashboard',d:'رابط الداشبورد'}] },
+  moderation: { emoji:'⚙️', label:'إشراف',        color:0xef4444, cmds:[{n:'ban',d:'باند عضو'},{n:'kick',d:'طرد عضو'},{n:'mute',d:'تايم أوت'},{n:'unmute',d:'رفع التايم أوت'},{n:'timeout',d:'تايم أوت بمدة مخصصة'},{n:'unban',d:'رفع الباند'},{n:'warn',d:'تحذير عضو'},{n:'warns',d:'تحذيرات عضو'},{n:'clearwarns',d:'مسح التحذيرات'},{n:'clear',d:'حذف رسائل'},{n:'lock',d:'قفل القناة'},{n:'unlock',d:'فتح القناة'},{n:'hide',d:'إخفاء القناة'},{n:'unhide',d:'إظهار القناة'},{n:'say',d:'إرسال رسالة'},{n:'come',d:'نداء عضو'},{n:'nickname',d:'تغيير اسم عضو'},{n:'role',d:'إعطاء/سحب رتبة'}] },
+  protection: { emoji:'🛡️', label:'حماية',        color:0x10b981, cmds:[{n:'setup-protection',d:'تفعيل كل الحماية'},{n:'anti-server-edit',d:'حماية اسم/صورة السيرفر'},{n:'anti-channel-edit',d:'حماية الرومات'},{n:'anti-channel-create',d:'منع إنشاء رومات'},{n:'anti-role-create',d:'منع إنشاء رتب'},{n:'anti-role-edit',d:'حماية صلاحيات الرتب'},{n:'anti-ban',d:'منع الباند الجماعي'},{n:'anti-kick',d:'منع الكيك الجماعي'},{n:'anti-bots',d:'منع البوتات'},{n:'anti-webhook',d:'منع الويب هوكس'},{n:'logs-status',d:'حالة الحماية'},{n:'set-protect-logs',d:'روم لوج الحماية'}] },
+  ticket:     { emoji:'🎫', label:'تذاكر',        color:0xb44fe8, cmds:[{n:'setup-ticket',d:'إعداد نظام التكت'},{n:'add-ticket-button',d:'إضافة زر تكت'},{n:'to-select',d:'تحويل لقائمة منسدلة'},{n:'add-user',d:'إضافة عضو للتكت'},{n:'remove-user',d:'إزالة عضو من التكت'},{n:'close',d:'إغلاق التكت'},{n:'rename',d:'تغيير اسم التكت'},{n:'delete',d:'حذف التكت'},{n:'set-ticket-log',d:'روم لوج التكت'}] },
+  levels:     { emoji:'📊', label:'مستويات',      color:0xf59e0b, cmds:[{n:'rank',d:'مستواك وXP'},{n:'leaderboard',d:'قائمة المتصدرين'},{n:'setlevel',d:'تعيين مستوى عضو'}] },
+  systems:    { emoji:'⚡', label:'الأنظمة',       color:0x06b6d4, cmds:[{n:'setup-welcome',d:'إعداد الترحيب'},{n:'setup-ai',d:'إعداد الذكاء الاصطناعي'},{n:'setup-log',d:'إعداد اللوجات'},{n:'autoreply-add',d:'إضافة رد تلقائي'},{n:'autoreply-remove',d:'حذف رد تلقائي'},{n:'autoreply-list',d:'قائمة الردود'},{n:'set-azkar-channel',d:'روم الأذكار'},{n:'azkar-mode',d:'تفعيل الأذكار'},{n:'azkar-time',d:'توقيت الأذكار'},{n:'set-suggestions-room',d:'روم الاقتراحات'},{n:'suggestion-mode',d:'تفعيل الاقتراحات'},{n:'set-feedback-room',d:'روم الآراء'},{n:'feedback-mode',d:'تفعيل الآراء'},{n:'set-tax-room',d:'روم الضريبة'},{n:'tax-mode',d:'تفعيل الضريبة'},{n:'setup-apply',d:'إعداد التقديمات'}] },
+  fun:        { emoji:'🎮', label:'مرح وألعاب',   color:0xec4899, cmds:[{n:'decoration',d:'زخرفة 25 شكل مع نسخ'},{n:'azkar',d:'ذكر عشوائي'},{n:'giveaway',d:'إدارة الهبات'},{n:'suggest',d:'إرسال اقتراح'},{n:'poll',d:'إنشاء استطلاع'}] },
+  owner:      { emoji:'👑', label:'أونر البوت',   color:0xf59e0b, cmds:[{n:'add-owner',d:'إضافة/إزالة أونر للبوت'},{n:'owners',d:'قائمة الأونرز'},{n:'bot-servers',d:'قائمة السيرفرات'},{n:'token-premium',d:'إدارة التوكن البريميوم'},{n:'bot-stats',d:'إحصائيات البوت'}] },
 };
 
+const TOTAL = Object.values(CATS).reduce((s,c) => s + c.cmds.length, 0);
+
 module.exports = {
-  data: new SlashCommandBuilder().setName('help').setDescription('📋 قائمة جميع الأوامر مع الاختصارات'),
+  ownersOnly: false,
+  data: new SlashCommandBuilder().setName('help').setDescription('📋 قائمة أوامر البوت الكاملة'),
+  CATEGORIES: CATS,
   async execute(interaction) {
-    const totalCmds = Object.values(CATEGORIES).reduce((a,c) => a + c.commands.length, 0);
+    try {
+      await interaction.deferReply();
+      const prefix = prefixDB.get(`prefix_${interaction.guild.id}`) || config.prefix || '!';
 
-    const embed = new EmbedBuilder()
-      .setColor('#5865f2')
-      .setTitle('⚡ Xtra Bot — قائمة الأوامر')
-      .setThumbnail(interaction.client.user.displayAvatarURL())
-      .setDescription([
-        '> استخدم الأوامر **بدون برفكس** أو بـ **/** — كل أمر له اختصارات جاهزة!',
-        '',
-        ...Object.entries(CATEGORIES).map(([name, data]) =>
-          `**${name}** • \`${data.commands.length}\` أمر`
-        ),
-        '',
-        `> **${totalCmds}+ أمر** متاح الآن!`
-      ].join('\n'))
-      .setFooter({ text: `Xtra Bot v2.0 • ${totalCmds}+ أمر • اختر فئة لرؤية التفاصيل` });
+      const mainEmbed = new EmbedBuilder().setColor(0x7c3aed)
+        .setAuthor({ name: `${interaction.client.user.username} — قائمة الأوامر`, iconURL: interaction.client.user.displayAvatarURL() })
+        .setThumbnail(interaction.client.user.displayAvatarURL({ size: 256 }))
+        .setDescription([
+          `> 🚀 **الأوامر تشتغل بدون prefix مباشرة أو بـ \`/\`**`,
+          `> ⚡ **إجمالي الأوامر:** \`${TOTAL}+\``,
+          `> 🔗 [إضافة البوت](https://discord.com/oauth2/authorize?client_id=${interaction.client.user.id}&permissions=8&scope=bot%20applications.commands) • [سيرفر الدعم](https://discord.gg/HC8V8cPF4)`,
+          '',
+          '**اختر قسماً من القائمة ↓**',
+        ].join('\n'))
+        .addFields(Object.values(CATS).map(c => ({ name: `${c.emoji} ${c.label}`, value: `\`${c.cmds.length}\` أمر`, inline: true })))
+        .setFooter({ text: `${TOTAL}+ أمر • ${interaction.guild.name}` }).setTimestamp();
 
-    const menu = new StringSelectMenuBuilder()
-      .setCustomId('help_select')
-      .setPlaceholder('📂 اختر فئة لرؤية أوامرها واختصاراتها...')
-      .addOptions(Object.entries(CATEGORIES).map(([name, data]) => ({
-        label: name, value: name, emoji: data.emoji
-      })));
+      const select = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder().setCustomId('help_select').setPlaceholder('📂 اختر قسماً...')
+          .addOptions([
+            { label: '🏠 الرئيسية',     value: 'home',       emoji: '🏠' },
+            { label: '🌟 عام',           value: 'general',    emoji: '🌟' },
+            { label: '⚙️ إشراف',         value: 'moderation', emoji: '⚙️' },
+            { label: '🛡️ حماية',         value: 'protection', emoji: '🛡️' },
+            { label: '🎫 تذاكر',         value: 'ticket',     emoji: '🎫' },
+            { label: '📊 مستويات',       value: 'levels',     emoji: '📊' },
+            { label: '⚡ الأنظمة',        value: 'systems',    emoji: '⚡' },
+            { label: '🎮 مرح وألعاب',   value: 'fun',        emoji: '🎮' },
+            { label: '👑 أونر البوت',    value: 'owner',      emoji: '👑' },
+          ])
+      );
 
-    await interaction.reply({
-      embeds: [embed],
-      components: [new ActionRowBuilder().addComponents(menu)]
-    });
-  },
-  CATEGORIES
+      const msg = await interaction.editReply({ embeds: [mainEmbed], components: [select] });
+      const col = msg.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, time: 120000 });
+      col.on('collect', async i => {
+        const val = i.values?.[0];
+        if (!val) return;
+        if (val === 'home') return i.update({ embeds: [mainEmbed], components: [select] });
+        const cat = CATS[val];
+        if (!cat) return;
+        const e = new EmbedBuilder().setColor(cat.color)
+          .setTitle(`${cat.emoji} ${cat.label} — ${cat.cmds.length} أمر`)
+          .setDescription(cat.cmds.map(c => `> **\`/${c.n}\`** — ${c.d}`).join('\n'))
+          .setFooter({ text: 'الأوامر تشتغل بدون prefix أو بـ /' }).setTimestamp();
+        i.update({ embeds: [e], components: [select] });
+      });
+      col.on('end', () => msg.edit({ components: [] }).catch(() => {}));
+    } catch (e) { console.error('help:', e); }
+  }
 };
