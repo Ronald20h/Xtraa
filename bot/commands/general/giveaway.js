@@ -1,115 +1,97 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
-const { dbRun, dbGet, dbAll } = require('../../database');
-
-function parseTime(str) {
-  const match = str.match(/^(\d+)(s|m|h|d)$/);
-  if (!match) return null;
-  const [, num, unit] = match;
-  const mult = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
-  return parseInt(num) * mult[unit];
-}
+const { dbGet, dbAll, dbRun, addLog } = require('../../database');
+const ms = require('ms');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('giveaway')
-    .setDescription('نظام الهبة / Giveaway system')
+    .setDescription('🎉 نظام الهبات')
     .addSubcommand(s => s.setName('start').setDescription('بدء هبة جديدة')
       .addStringOption(o => o.setName('prize').setDescription('الجائزة').setRequired(true))
       .addStringOption(o => o.setName('duration').setDescription('المدة (مثال: 1h, 30m, 1d)').setRequired(true))
-      .addIntegerOption(o => o.setName('winners').setDescription('عدد الفائزين').setMinValue(1).setMaxValue(10))
+      .addIntegerOption(o => o.setName('winners').setDescription('عدد الفائزين').setMinValue(1).setMaxValue(20))
       .addChannelOption(o => o.setName('channel').setDescription('القناة')))
-    .addSubcommand(s => s.setName('end').setDescription('إنهاء هبة').addStringOption(o => o.setName('id').setDescription('ID الهبة').setRequired(true)))
-    .addSubcommand(s => s.setName('reroll').setDescription('إعادة السحب').addStringOption(o => o.setName('id').setDescription('ID الهبة').setRequired(true)))
-    .addSubcommand(s => s.setName('list').setDescription('قائمة الهبات'))
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+    .addSubcommand(s => s.setName('end').setDescription('إنهاء هبة')
+      .addStringOption(o => o.setName('message_id').setDescription('ID رسالة الهبة').setRequired(true)))
+    .addSubcommand(s => s.setName('reroll').setDescription('إعادة السحب')
+      .addStringOption(o => o.setName('message_id').setDescription('ID رسالة الهبة').setRequired(true))),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'start') {
-      const prize = interaction.options.getString('prize');
-      const dur = interaction.options.getString('duration');
-      const winners = interaction.options.getInteger('winners') || 1;
-      const ch = interaction.options.getChannel('channel') || interaction.channel;
-      const ms = parseTime(dur);
-      if (!ms) return interaction.reply({ content: '❌ مدة غير صحيحة! استخدم مثلاً: 1h, 30m, 1d', ephemeral: true });
-
-      const endsAt = new Date(Date.now() + ms).toISOString();
-      const embed = new EmbedBuilder()
-        .setColor('#ffd700')
-        .setTitle(`🎉 هبة! — ${prize}`)
+      if (!interaction.member?.permissions.has('ManageGuild'))
+        return interaction.reply({ content: '❌ تحتاج صلاحية إدارة السيرفر', ephemeral: true });
+      const prize    = interaction.options.getString('prize');
+      const durStr   = interaction.options.getString('duration');
+      const winners  = interaction.options.getInteger('winners') || 1;
+      const ch       = interaction.options.getChannel('channel') || interaction.channel;
+      let duration;
+      try { duration = ms(durStr); } catch { duration = null; }
+      if (!duration) return interaction.reply({ content: '❌ مدة خاطئة. مثال: `1h` `30m` `1d`', ephemeral: true });
+      const endsAt = new Date(Date.now() + duration);
+      const embed = new EmbedBuilder().setColor(0xf59e0b)
+        .setTitle(`🎉 ${prize}`)
         .setDescription([
-          `**🎁 الجائزة:** ${prize}`,
-          `**👑 الفائزون:** ${winners} شخص`,
-          `**⏰ تنتهي:** <t:${Math.floor((Date.now() + ms) / 1000)}:R>`,
-          `**🎫 للمشاركة:** اضغط 🎉`,
-          `**👤 بواسطة:** ${interaction.user}`
+          `> اضغط على 🎉 للمشاركة!`,
+          ``,
+          `**🏆 الفائزون:** ${winners}`,
+          `**⏰ ينتهي:** <t:${Math.floor(endsAt.getTime()/1000)}:R>`,
+          `**📣 بواسطة:** ${interaction.user}`,
         ].join('\n'))
-        .setFooter({ text: `${winners} فائز • تنتهي` })
-        .setTimestamp(new Date(Date.now() + ms));
-
+        .setTimestamp(endsAt)
+        .setFooter({ text: `${winners} فائز • ينتهي` });
       const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('giveaway_enter').setLabel('🎉 المشاركة').setStyle(ButtonStyle.Primary)
+        new ButtonBuilder().setCustomId('giveaway_enter').setLabel('🎉 شارك').setStyle(ButtonStyle.Success)
       );
       const msg = await ch.send({ embeds: [embed], components: [row] });
-      dbRun('INSERT INTO giveaways (guild_id, channel_id, message_id, prize, winner_count, host_id, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [interaction.guildId, ch.id, msg.id, prize, winners, interaction.user.id, endsAt]);
-      const ga = dbGet('SELECT * FROM giveaways WHERE message_id = ?', [msg.id]);
-      await interaction.reply({ content: `✅ تم إنشاء الهبة! [انتقل إليها](${msg.url}) — ID: \`${ga.id}\``, ephemeral: true });
+      dbRun('INSERT INTO giveaways (guild_id, channel_id, message_id, prize, winner_count, host_id, ends_at) VALUES (?,?,?,?,?,?,?)',
+        [interaction.guildId, ch.id, msg.id, prize, winners, interaction.user.id, endsAt.toISOString()]);
+      await interaction.reply({ content: `✅ تم بدء الهبة في <#${ch.id}>`, ephemeral: true });
 
-      // Auto-end
+      // مؤقت للانتهاء
       setTimeout(async () => {
-        try { await endGiveaway(ga.id, interaction.client); } catch {}
-      }, ms);
+        try {
+          const ga = dbGet('SELECT * FROM giveaways WHERE message_id = ? AND status = "active"', [msg.id]);
+          if (!ga) return;
+          const entries = dbAll('SELECT * FROM giveaway_entries WHERE giveaway_id = ?', [ga.id]);
+          const winnerList = [];
+          const pool = [...entries];
+          for (let i = 0; i < Math.min(winners, pool.length); i++) {
+            const idx = Math.floor(Math.random() * pool.length);
+            winnerList.push(pool.splice(idx, 1)[0]);
+          }
+          dbRun('UPDATE giveaways SET status = "ended", winners = ? WHERE id = ?',
+            [JSON.stringify(winnerList.map(w => w.user_id)), ga.id]);
+          const winText = winnerList.length ? winnerList.map(w => `<@${w.user_id}>`).join(', ') : 'لا أحد شارك 😢';
+          await msg.edit({ embeds: [embed.setColor(0xef4444).setTitle(`🎊 ${prize} — انتهت!`)
+            .setDescription(`**الفائزون:** ${winText}\n**المشاركون:** ${entries.length}`)
+            .setFooter({ text: 'انتهت الهبة' })], components: [] });
+          await ch.send({ content: `🎊 تهانينا! الفائزون في **${prize}**: ${winText}` });
+        } catch {}
+      }, duration);
+    }
 
-    } else if (sub === 'end') {
-      const id = parseInt(interaction.options.getString('id'));
-      await endGiveaway(id, interaction.client);
-      await interaction.reply({ content: '✅ تم إنهاء الهبة!', ephemeral: true });
+    if (sub === 'end') {
+      const msgId = interaction.options.getString('message_id');
+      const ga = dbGet('SELECT * FROM giveaways WHERE message_id = ? AND guild_id = ?', [msgId, interaction.guildId]);
+      if (!ga) return interaction.reply({ content: '❌ لم يتم إيجاد الهبة', ephemeral: true });
+      const entries = dbAll('SELECT * FROM giveaway_entries WHERE giveaway_id = ?', [ga.id]);
+      if (!entries.length) return interaction.reply({ content: '❌ لا توجد مشاركات', ephemeral: true });
+      const idx = Math.floor(Math.random() * entries.length);
+      const winner = entries[idx];
+      dbRun('UPDATE giveaways SET status = "ended", winners = ? WHERE id = ?', [JSON.stringify([winner.user_id]), ga.id]);
+      return interaction.reply({ content: `🎊 الفائز في **${ga.prize}**: <@${winner.user_id}>` });
+    }
 
-    } else if (sub === 'reroll') {
-      const id = parseInt(interaction.options.getString('id'));
-      const ga = dbGet('SELECT * FROM giveaways WHERE id = ?', [id]);
-      if (!ga) return interaction.reply({ content: '❌ هبة غير موجودة', ephemeral: true });
-      const entries = dbAll('SELECT * FROM giveaway_entries WHERE giveaway_id = ?', [id]);
-      if (!entries.length) return interaction.reply({ content: '❌ لا توجد مشاركين', ephemeral: true });
+    if (sub === 'reroll') {
+      const msgId = interaction.options.getString('message_id');
+      const ga = dbGet('SELECT * FROM giveaways WHERE message_id = ? AND guild_id = ?', [msgId, interaction.guildId]);
+      if (!ga) return interaction.reply({ content: '❌ لم يتم إيجاد الهبة', ephemeral: true });
+      const entries = dbAll('SELECT * FROM giveaway_entries WHERE giveaway_id = ?', [ga.id]);
+      if (!entries.length) return interaction.reply({ content: '❌ لا توجد مشاركات', ephemeral: true });
       const winner = entries[Math.floor(Math.random() * entries.length)];
-      const ch = await interaction.client.channels.fetch(ga.channel_id).catch(() => null);
-      if (ch) await ch.send(`🎊 إعادة سحب الهبة **${ga.prize}** — الفائز الجديد: <@${winner.user_id}>!`);
-      await interaction.reply({ content: `✅ الفائز الجديد: <@${winner.user_id}>`, ephemeral: true });
-
-    } else if (sub === 'list') {
-      const list = dbAll('SELECT * FROM giveaways WHERE guild_id = ? AND status = "active" ORDER BY id DESC LIMIT 10', [interaction.guildId]);
-      if (!list.length) return interaction.reply({ content: '📭 لا توجد هبات نشطة', ephemeral: true });
-      const embed = new EmbedBuilder().setColor('#ffd700').setTitle('🎉 الهبات النشطة')
-        .setDescription(list.map(g => `**ID ${g.id}** — ${g.prize} | تنتهي <t:${Math.floor(new Date(g.ends_at).getTime()/1000)}:R>`).join('\n'));
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ content: `🔄 الفائز الجديد في **${ga.prize}**: <@${winner.user_id}>` });
     }
   }
 };
-
-async function endGiveaway(id, client) {
-  const ga = dbGet('SELECT * FROM giveaways WHERE id = ?', [id]);
-  if (!ga || ga.status !== 'active') return;
-  const entries = dbAll('SELECT * FROM giveaway_entries WHERE giveaway_id = ?', [id]);
-  dbRun('UPDATE giveaways SET status = "ended" WHERE id = ?', [id]);
-  const ch = await client.channels.fetch(ga.channel_id).catch(() => null);
-  if (!ch) return;
-  if (!entries.length) { await ch.send(`❌ انتهت الهبة **${ga.prize}** بدون فائزين!`); return; }
-  const winners = [];
-  const pool = [...entries];
-  for (let i = 0; i < Math.min(ga.winner_count, pool.length); i++) {
-    const idx = Math.floor(Math.random() * pool.length);
-    winners.push(pool.splice(idx, 1)[0]);
-  }
-  const winMentions = winners.map(w => `<@${w.user_id}>`).join(', ');
-  dbRun('UPDATE giveaways SET winners = ? WHERE id = ?', [JSON.stringify(winners.map(w => w.user_id)), id]);
-  const embed = new EmbedBuilder().setColor('#00ff88').setTitle(`🎊 انتهت الهبة — ${ga.prize}`)
-    .setDescription(`**🏆 الفائزون:** ${winMentions}\n**🎁 الجائزة:** ${ga.prize}\n**👤 بواسطة:** <@${ga.host_id}>`)
-    .setTimestamp();
-  try {
-    const msg = await ch.messages.fetch(ga.message_id);
-    await msg.edit({ embeds: [embed], components: [] });
-  } catch {}
-  await ch.send({ content: `🎊 تهانينا ${winMentions}! فزتم بـ **${ga.prize}**!` });
-}
