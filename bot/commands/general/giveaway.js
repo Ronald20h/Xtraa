@@ -1,6 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 const { dbGet, dbAll, dbRun, addLog } = require('../../database');
-const ms = require('ms');
+// دالة بسيطة بدل مكتبة ms
+function parseTime(str) {
+  const units = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+  const match = str.match(/^(\d+)(s|m|h|d)$/i);
+  if (match) return parseInt(match[1]) * units[match[2].toLowerCase()];
+  return parseInt(str) * 60000; // افتراضي دقائق
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,7 +33,7 @@ module.exports = {
       const winners  = interaction.options.getInteger('winners') || 1;
       const ch       = interaction.options.getChannel('channel') || interaction.channel;
       let duration;
-      try { duration = ms(durStr); } catch { duration = null; }
+      try { duration = parseTime(durStr); } catch { duration = null; }
       if (!duration) return interaction.reply({ content: '❌ مدة خاطئة. مثال: `1h` `30m` `1d`', ephemeral: true });
       const endsAt = new Date(Date.now() + duration);
       const embed = new EmbedBuilder().setColor(0xf59e0b)
