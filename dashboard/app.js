@@ -54,6 +54,32 @@ module.exports = function(client) {
   app.use(passport.session());
   app.use((req, res, next) => { req.client = client; next(); });
 
+
+  // Owner Premium API
+  app.post('/api/owner/premium', (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'غير مسجل' });
+    const ids = (process.env.OWNER_IDS || process.env.OWNER_ID || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (!ids.includes(req.user.id)) return res.status(403).json({ error: '❌ غير مصرح' });
+    const { dbGet, dbRun, ensureGuild } = require('../bot/database');
+    const { guildId, action, days } = req.body;
+    if (!guildId) return res.json({ error: 'أدخل ID السيرفر' });
+    try {
+      ensureGuild(guildId);
+      if (action === 'add') {
+        const exp = days ? new Date(Date.now() + days * 86400000).toISOString() : null;
+        dbRun('INSERT OR REPLACE INTO premium_servers (guild_id, granted_by, expires_at, plan) VALUES (?,?,?,?)', [guildId, req.user.id, exp, 'basic']);
+        dbRun('UPDATE guilds SET premium = 1 WHERE id = ?', [guildId]);
+        return res.json({ success: true, message: `✅ تم منح Premium لـ ${guildId}` });
+      }
+      if (action === 'remove') {
+        dbRun('DELETE FROM premium_servers WHERE guild_id = ?', [guildId]);
+        dbRun('UPDATE guilds SET premium = 0 WHERE id = ?', [guildId]);
+        return res.json({ success: true, message: `✅ تم سحب Premium من ${guildId}` });
+      }
+      res.json({ error: 'action غير صحيح' });
+    } catch(e) { res.json({ error: e.message }); }
+  });
+
   app.use('/', require('./routes/index'));
   app.use('/auth', require('./routes/auth'));
   app.use('/dashboard', require('./routes/dashboard'));

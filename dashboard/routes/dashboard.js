@@ -2,6 +2,12 @@ const router = require('express').Router();
 const { dbGet, dbAll, dbRun, ensureGuild, updateGuild, addLog } = require('../../bot/database');
 const { ButtonStyle, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ChannelType } = require('discord.js');
 
+
+function checkIsOwner(userId) {
+  const ids = (process.env.OWNER_IDS || process.env.OWNER_ID || '').split(',').map(s => s.trim()).filter(Boolean);
+  return ids.includes(userId);
+}
+
 function isAuth(req, res, next) {
   if (req.user) return next();
   res.redirect('/auth/login');
@@ -24,8 +30,8 @@ router.get('/', isAuth, (req, res) => {
       iconURL: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : null,
       premium: !!dbGet('SELECT * FROM premium_servers WHERE guild_id = ?', [g.id])
     }));
-    res.render('dashboard/servers', { user: req.user, guilds: guildsWithBot });
-  } catch { res.render('dashboard/servers', { user: req.user, guilds: [] }); }
+    res.render('dashboard/servers', { user: req.user, guilds: guildsWithBot, isOwner: checkIsOwner(req.user.id) });
+  } catch { res.render('dashboard/servers', { user: req.user, guilds: [], isOwner: checkIsOwner(req.user.id) }); }
 });
 
 router.get('/guild/:id', isAuth, hasGuildAccess, (req, res) => {
@@ -50,7 +56,7 @@ router.get('/guild/:id', isAuth, hasGuildAccess, (req, res) => {
       user: req.user,
       guild: { ...guildData, name: botGuild.name, icon: botGuild.iconURL(), memberCount: botGuild.memberCount, id: guildId },
       guildData, channels, categories, roles, premium, tickets, logs, topMembers, autoresponds,
-      shortcuts, autoRoles, levelRoles, whitelist, query: req.query
+      shortcuts, autoRoles, levelRoles, whitelist, query: req.query, isOwner: checkIsOwner(req.user.id)
     });
   } catch (e) { console.error(e); res.redirect('/dashboard'); }
 });
